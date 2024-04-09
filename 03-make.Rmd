@@ -1,0 +1,630 @@
+# Make {#make}
+
+```{r make-libraries, eval=TRUE, include=FALSE}
+library(rFIA)
+library(tidyverse)
+library(sf)
+library(leaflet)
+```
+
+## Load data
+
+Location where data was saved from previous chapter (clip)
+
+```{r clip-data-location}
+## default location:
+load_location_default <- './clip_FIA/'
+## custom location:
+load_location_custom <- 'C:/Users/JJGross/Documents/R_projects/FIA_data/clip_FIA/' 
+#set variable
+load_location <- load_location_custom
+```
+
+Load data and set as default argument variables
+
+```{r load-clip-data}
+## Load most recent (MR) Appalachian trail (at) dataset:
+at_MR <- read_rds(file = paste0(load_location, "at_FIA_MR.rds"))
+## Load entire Appalachian trail (at) dataset:
+at <- read_rds(file = paste0(load_location, "at_FIA.rds")) 
+## Load eco
+eco <- read_rds(file = paste0(load_location, "eco.rds")) 
+
+## Set default variables for rFIA function:
+database_variable <- at
+polys_variable <- eco
+```
+
+## Save location
+
+Choose where final tables will be saved:
+
+```{r make-save-location, class.source=".user-input"}
+## default location:
+save_default <- './summary_data/' 
+## Alternatively, enter specific custom location:
+save_custom <- 'C:/Users/JJGross/Documents/R_projects/FIA_data/summary_data/'
+
+save_location <- save_custom
+
+## Create directory if it doesn't already exist
+if (!dir.exists(save_location)) {dir.create(save_location)}
+```
+
+
+## Metrics
+
+Derive population estimates (at the plot- or the ecoregion-scale) for each forest health metric:
+
+**Live tree abundance**
+
+-   [tpa](#tpa)
+-   [tpa_spp](#tpa_spp)
+-   [tpa_spp_sizecl](#tpa_spp_sizecl)
+-   [biomass](#biomass)
+
+**Species diversity of live trees**
+
+-   [diversity](#diversity)
+
+**Tree vital rates**
+
+-   [growth](#growth)
+
+**Forest demographic rates**
+
+-   [mortality](#mortality)
+
+**Regeneration abundance**
+
+-   [seedlings](#seedlings)
+-   [seedlings_spp](#seedlings_spp)
+-   [saplings](#saplings)
+-   [saplings_spp](#saplings_spp)
+-   [saplings_sizecl](#saplings_sizecl)
+
+**Snags**
+
+-   [snag_abundance](#snag_abundance)
+-   [dead_and_live_tpa](#dead_and_live_tpa)
+-   [snag_volume](#snag_volume)
+
+**Down woody material**
+
+-   [downwoody](#downwoody)
+
+**Invasive plant abundance**
+
+-   [invasive](#invasive)
+
+**Stand structural stage distributions**
+
+-   [ss](#ss)
+
+Each of the following subsections illustrates how to use the variety of functions in `rFIA` to calculate these metrics.
+
+### Argument Variables
+
+Are plot-level records desired within each `SUBSECTION`? If so, run the entire `03-make.Rmd` with `by_plot_variable` set to `TRUE`. Otherwise, leave `by_plot_variable <- FALSE` to aggregate FIA plots at `SUBSECTION` level.
+
+-   `by_plot_variable <- FALSE` means tables are summarized at SUBSECTION-level
+-   `by_plot_variable <- TRUE` means tables are summarized at the FIA plot-level
+
+```{r, input-plot, class.source=".user-input"}
+by_plot_variable <- FALSE
+```
+
+-   `most_recent <- FALSE` means all FIA plots are included in the data tables
+-   `most_recent <- TRUE` means only the most recent FIA plots are included
+
+```{r, input-most-recent, class.source=".user-input"}
+most_recent <- TRUE
+```
+
+The code chunk below automatically updates argument variables and folder save location based on above user input (blue boxes) to `by_plot_variable` and `most_recent`. Code chunk also specifies the number of processing cores to use during the execution of rFIA functions. See the rFIA webpage [Tips for working with Big Data](https://rfia.netlify.app/tutorial/bigdata/) for more information.
+
+```{r set-variables}
+## save tables to new folder if by_plot_variable is TRUE
+if (by_plot_variable == TRUE) {
+  # new save location folder
+  ifelse(!dir.exists(file.path(save_location)), dir.create(file.path(save_location)), FALSE)
+  save_location <- paste0(save_location, "by_plot_variable/")
+  
+}
+
+## if 'most_recent == TRUE', than change database_variable to 'at_MR' database 
+## and create new folder to save MR tables to. 
+if (most_recent == TRUE) {
+  database_variable <- at_MR
+  # new save location folder
+  ifelse(!dir.exists(file.path(save_location, "most_recent")), 
+         dir.create(file.path(save_location, "most_recent")), FALSE)
+  save_location <- paste0(save_location, "most_recent/")
+}
+
+## default number of processing cores to utilize in rFIA function arguments below.
+cores_variable <- parallel::detectCores()-2
+```
+
+### Population estimate method
+
+Functions in `rFIA` can be used to derive population estimates of forest data using 5 unique estimators (i.e. different methods for panel combination) using the `method` argument in each function. For the purposes of forest population estimation for APPA, only the `method = ANNUAL` argument is used (i.e. no panel combination). For more information on panel combinations see the rFIA [Alternative design-based estimators](https://rfia.netlify.app/tutorial/ae/) page.
+
+```{r set-method-argument}
+## Set method variable for rFIA function arguments here:
+method_variable <- "ANNUAL"
+```
+
+::: {.alert .alert-danger}
+Note that when using `method = "ANNUAL"` all `rFIA::` functions result with the following error message: 
+
+"Bad stratification, i.e., strata too small to compute variance of annual panels. If you are only interested in totals and/or ratio estimates, disregard this. However, if interested in variance (e.g., for confidence intervals) try using method = "TI"."
+:::
+
+
+## Live tree abundance
+
+The [rFIA::tpa()](https://rdrr.io/cran/rFIA/man/tpa.html) function Produces tree per acre (TPA) and basal area per acre (BAA) estimates from FIA data, along with population totals for each variable. Options to group estimates by species, size class, and other variables defined in the FIADB.
+
+Argument `treeDomain = DIA \>= 5` results in estimates only utilizing tree diameters above 5 inches DBH.
+
+### tpa {#tpa}
+
+```{r tpa}
+## Trees per Acre (species and size classes lumped)
+tpa <- rFIA::tpa(
+  db = database_variable,
+  byPlot = by_plot_variable,
+  polys = polys_variable,
+  method = method_variable,
+  nCores = cores_variable,
+  returnSpatial = TRUE,
+  treeType = "live",
+  totals = TRUE,
+  treeDomain = DIA >= 5
+) 
+saveRDS(tpa, paste0(save_location, "tpa.rds"))
+```
+
+### tpa_spp {#tpa_spp}
+
+```{r tpa-spp}
+## Trees per Acre by species (size-classes lumped)
+tpa_spp <- rFIA::tpa(
+  db = database_variable,
+  byPlot = by_plot_variable,
+  polys = polys_variable,
+  method = method_variable,
+  nCores = cores_variable,
+  returnSpatial = TRUE,
+  treeType = "live",
+  totals = TRUE,
+  treeDomain = DIA >= 5,
+  bySpecies = TRUE,
+  bySizeClass = FALSE
+) 
+saveRDS(tpa_spp, paste0(save_location, "tpa_spp.rds"))
+```
+
+### tpa_spp_sizecl {#tpa_spp_sizecl}
+
+```{r tpa-spp-sizecl}
+## Trees per Acre (by species and size-class)
+tpa_spp_sizecl <- rFIA::tpa(
+  db = database_variable,
+  byPlot = by_plot_variable,
+  polys = polys_variable,
+  method = method_variable,
+  nCores = cores_variable,
+  returnSpatial = TRUE,
+  treeType = "live",
+  totals = TRUE,
+  treeDomain = DIA >= 5,
+  bySpecies = TRUE,
+  bySizeClass = TRUE
+)
+saveRDS(tpa_spp_sizecl, paste0(save_location, "tpa_spp_sizecl.rds"))
+```
+
+### biomass {#biomass}
+
+The [rFIA::biomass()](https://rdrr.io/cran/rFIA/man/biomass.html) function produces estimates of volume (cu.ft./acre), biomass (tons/acre), and carbon (tons/acre) with options to group estimates by species, size class, and other variables defined in the FIADB.
+
+```{r biomass}
+## biomass (by species and size-class)
+# biomass <- rFIA::biomass(db = database_variable,
+#            byPlot = by_plot_variable,
+#            polys = polys_variable, 
+#            method = method_variable,
+#            nCores = cores_variable,
+#            returnSpatial = TRUE,
+#            treeType = "live",
+#            totals = TRUE,
+#            treeDomain = DIA >= 5,
+#            bySpecies = TRUE, 
+#            bySizeClass = TRUE) 
+# saveRDS(biomass, paste0(save_location, "biomass.rds"))
+```
+
+::: {.alert .alert-danger}
+Note that the `rFIA::biomass()` function currently produces the following error and needs attention from package developers.
+
+Error in fcase(is.na(DIA), NA_real\_, !is.na(DRYBIO_WDLD_SPP), DRYBIO_WDLD_SPP/(jTotal - : object 'DRYBIO_WDLD_SPP' not found
+:::
+
+## Species diversity of live trees
+
+The [rFIA::diversity()](https://rdrr.io/cran/rFIA/man/diversity.html) function produces estimates of diversity from FIA data. Returns Shannon's Index (H), Shannon's Equitability (Eh), and Richness (S) for alpha (mean/SE of stands), beta, and gamma diversity. Default behavior estimates species diversity, using TPA as a state variable and Species Code (SPCD) to groups of individuals.
+
+### diversity {#diversity}
+
+```{r diversity}
+## Diversity
+diversity <- rFIA::diversity(
+  db = database_variable,
+  byPlot = by_plot_variable,
+  polys = polys_variable,
+  method = method_variable,
+  nCores = cores_variable,
+  returnSpatial = TRUE,
+  treeType = "live",
+  totals = TRUE,
+  treeDomain = DIA >= 5
+)
+saveRDS(diversity, paste0(save_location, "diversity.rds"))
+```
+
+## Tree growth rates
+
+The [rFIA::vitalRates()](https://rdrr.io/cran/rFIA/man/vitalRates.html) function computes estimates of average annual DBH (inches/ yr), basal area (sq. ft./ yr), biomass (short tons/ yr), and net volume (cu. ft./yr) growth rates for individual stems, along with average annual basal area and net volume growth per acre.
+
+To calcuate by size class include argument `bySizeClass =TRUE`
+
+To estimate net growth rates (include trees that have recruited or died in estimates), use `treeType = 'all'` (default)
+
+To exclude stems that died or recruited into the population between plot measurements set `treeType = 'live'`
+
+### growth {#growth}
+
+```{r growth-rate}
+## Tree DBH growth
+growth <- rFIA::vitalRates(
+  db = database_variable,
+  byPlot = by_plot_variable,
+  polys = polys_variable,
+  method = method_variable,
+  nCores = cores_variable,
+  returnSpatial = TRUE,
+  treeType = "live",
+  totals = TRUE,
+  treeDomain = DIA >= 5,
+  bySpecies = TRUE,
+  variance = TRUE # note error message: "Bad stratification, i.e., strata too small to compute variance of annual panels." 
+)
+saveRDS(growth, paste0(save_location, "growth.rds"))
+
+```
+
+## Forest demographic rates
+
+The [rFIA::growMort()](https://rdrr.io/cran/rFIA/man/growMort.html) function estimates of annual growth, recruitment, natural mortality, and harvest rates, along with population estimates for each variable.
+
+Recruitment events are defined as when a live stem which is less than 5 inches DBH at time 1, grows to or beyond 5 inches DBH by time 2. This does NOT include stems which grow beyond the 5-inch diameter criteria and are then subject to mortality prior to remeasurement. Natural mortality is defined as when a live stem is subject to non-harvest mortality between successive measurement periods. Finally, harvest is defined as when a live stem is cut and removed between successive measurements.
+
+### mortality {#mortality}
+
+To estimate mortality per species:
+
+```{r mortality}
+## mortality
+mortality <- rFIA::growMort(
+  db = database_variable,
+  byPlot = by_plot_variable,
+  polys = polys_variable,
+  method = method_variable,
+  nCores = cores_variable,
+  returnSpatial = TRUE,
+  treeType = "all", #default, includes all stems, live and dead
+  totals = TRUE,
+  treeDomain = DIA >= 5,
+  bySpecies = TRUE,
+  variance = TRUE # note error message: "Bad stratification, i.e., strata too small to compute variance of annual panels." 
+)
+saveRDS(mortality, paste0(save_location, "mortality.rds"))
+```
+::: {.alert .alert-danger}
+Column `mortality$MORT_PERC` results in `Inf` for each row. Suspected error with `rFIA::growMort()` because none of the tables produced had any values in `MORT_PREC`
+:::
+
+## Regeneration abundance
+
+The [rFIA::seedlings()](https://rdrr.io/cran/rFIA/man/seedling.html) and [rFIA::tpa()](https://rdrr.io/cran/rFIA/man/tpa.html) functions are used to estimate regeneration of seedlings and sapling, respectively. Note that querying saplings can be achieved within the `rFIA::tpa()` function by setting the tree domain argument `treeDomain = DIA < 5`. Stems below 1 inch DBH are not included in output of `rFIA::tpa()` because FIA seedlings (\<1 inch DBH) are sampled differently and therefore queried using the distinct `rFIA::seedlings()` function.
+
+### seedlings {#seedlings}
+
+Seedling abundance (trees per acre) is computed using the distinct `rFIA::seedlings()` function, not the `rFIA::tpa()` function.
+
+The [FIA glossary](https://www.fs.usda.gov/research/understory/forest-inventory-and-analysis-glossary-standard-terminology) defines seedlings as: "Live trees smaller than 1.0 inch (2.5 cm) d.b.h./d.r.c. that are at least 6 inches (15.2 cm) in height for softwoods and 12-inches (30.5 cm) in height for hardwoods."
+
+```{r seedlings}
+## Trees per acre of seedlings (<1 inch DBH)
+seedlings <- rFIA::seedling(
+  db = database_variable,
+  byPlot = by_plot_variable,
+  polys = polys_variable,
+  method = method_variable,
+  nCores = cores_variable,
+  returnSpatial = TRUE,
+  totals = TRUE
+) 
+saveRDS(seedlings, paste0(save_location, "seedlings.rds"))
+```
+
+### seedlings_spp {#seedlings_spp}
+
+```{r seedlings-spp}
+## Trees per acre of seedlings by species
+seedlings_spp <- rFIA::seedling(
+  db = database_variable,
+  byPlot = by_plot_variable,
+  polys = polys_variable,
+  method = method_variable,
+  nCores = cores_variable,
+  returnSpatial = TRUE,
+  totals = TRUE,
+  bySpecies = TRUE # by species
+) 
+saveRDS(seedlings_spp, paste0(save_location, "seedlings_spp.rds"))
+```
+
+### saplings {#saplings}
+
+Saplings must use `rFIA::tpa()` function with `treeDomain = DIA < 5` argument To estimate sapling size class (1 to 4.9 inch DBH).
+
+```{r saplings}
+## Trees per acre of saplings (trees greater than 1 inch DBH, and less than 5 inch DBH)
+saplings <- rFIA::tpa(
+  db = database_variable,
+  byPlot = by_plot_variable,
+  polys = polys_variable,
+  method = method_variable,
+  nCores = cores_variable,
+  returnSpatial = TRUE,
+  treeType = "live",
+  totals = TRUE,
+  treeDomain = DIA < 5
+) 
+saveRDS(saplings, paste0(save_location, "saplings.rds"))
+```
+
+### saplings_spp {#saplings_spp}
+
+```{r saplings-spp}
+## Trees per acre of saplings by species 
+saplings_spp <- rFIA::tpa(
+  db = database_variable,
+  byPlot = by_plot_variable,
+  polys = polys_variable,
+  method = method_variable,
+  nCores = cores_variable,
+  returnSpatial = TRUE,
+  treeType = "live",
+  totals = TRUE,
+  treeDomain = DIA < 5,
+  bySpecies = TRUE, # by species
+  bySizeClass = FALSE
+) 
+saveRDS(saplings_spp, paste0(save_location, "saplings_spp.rds"))
+```
+
+### saplings_sizecl {#saplings_sizecl}
+
+```{r saplings-sizecl}
+## Trees per acre of saplings by size class 
+saplings_sizecl <- rFIA::tpa(
+  db = database_variable,
+  byPlot = by_plot_variable,
+  polys = polys_variable,
+  method = method_variable,
+  nCores = cores_variable,
+  returnSpatial = TRUE,
+  treeType = "live",
+  totals = TRUE,
+  treeDomain = DIA < 5,
+  bySpecies = FALSE,
+  bySizeClass = TRUE # by size class
+) 
+saveRDS(saplings_sizecl, paste0(save_location, "saplings_sizecl.rds"))
+```
+
+## Snags
+
+[rFIA::tpa()](https://rdrr.io/cran/rFIA/man/tpa.html) and [rFIA::biomass()](https://rdrr.io/cran/rFIA/man/biomass.html) can be used to estimate snag abundance, volume, and percentage.
+
+### snag_abundance {#snag_abundance}
+
+`treeType = "dead"` `bySizeClass = TRUE`
+
+```{r snag-abundance}
+## Snags per acre
+snag_abundance <- rFIA::tpa(
+  db = database_variable,
+  byPlot = by_plot_variable,
+  polys = polys_variable,
+  method = method_variable,
+  nCores = cores_variable,
+  returnSpatial = TRUE,
+  treeType = "dead",
+  totals = TRUE,
+  treeDomain = DIA >= 5,
+  bySizeClass = TRUE
+)
+
+saveRDS(snag_abundance, paste0(save_location, "snag_abundance.rds"))
+```
+
+### dead_and_live_tpa {#dead_and_live_tpa}
+
+`treeType = "all"` includes both live and dead trees in calculations. Use `grpBy = STATUSCD` to avoid lumping Live and Dead tree.
+
+| STATUSCD | Description                                                                                                                                                                                                                                                                                                                                                                                           |
+|---------------|---------------------------------------------------------|
+| 0        | No status - Tree is not presently in the sample (remeasurement plots only). Tree was incorrectly tallied at the previous inventory, currently not tallied due to definition or procedural change, or is not tallied because it is located on a nonsampled condition (e.g., hazardous or denied). RECONCILECD = 5-9 required for remeasured annual inventory data but not for periodic inventory data. |
+| 1        | Live tree                                                                                                                                                                                                                                                                                                                                                                                             |
+| 2        | Dead tree                                                                                                                                                                                                                                                                                                                                                                                             |
+| 3        | Removed - Cut and removed by direct human activity related to harvesting, silviculture or land clearing. This tree is assumed to be utilized.                                                                                                                                                                                                                                                         |
+
+: STATUSCD (From The FIA Database User Guide)
+
+```{r dead-and-live-tpa}
+## dead and live trees - to calculate percent snags
+dead_and_live_tpa <- rFIA::tpa(
+  db = database_variable,
+  byPlot = by_plot_variable,
+  polys = polys_variable,
+  method = method_variable,
+  nCores = cores_variable,
+  returnSpatial = TRUE,
+  treeType = "all",
+  grpBy = STATUSCD,
+  totals = TRUE,
+  treeDomain = DIA >= 5,
+  bySizeClass = TRUE
+)
+
+dead_and_live_tpa <- dead_and_live_tpa |>
+  filter(STATUSCD == 1 | STATUSCD == 2) |> #only interested in live and dead 
+  mutate(tree_status = case_when(STATUSCD == 1 ~ "Live",
+                                 STATUSCD == 2 ~ "Dead",
+                                 #anything else will result in NA
+                                 TRUE ~ NA)) 
+  
+saveRDS(dead_and_live_tpa, paste0(save_location, "dead_and_live_tpa.rds"))
+```
+
+### snag_volume {#snag_volume}
+
+```{r snag-volume}
+# ## Snag Volume 
+# snag_volume <- rFIA::biomass(
+#   db = database_variable,
+#   byPlot = by_plot_variable,
+#   polys = polys_variable,
+#   method = method_variable,
+#   nCores = cores_variable,
+#   returnSpatial = TRUE,
+#   treeType = "dead",
+#   totals = TRUE,
+#   treeDomain = DIA >= 5 
+# )
+# saveRDS(snag_volume, paste0(save_location, "snag_volume.rds"))
+```
+
+::: {.alert .alert-danger}
+Note that the `rFIA::biomass()` function currently produces the following error and needs attention from package developers.
+
+Error in fcase(is.na(DIA), NA_real\_, !is.na(DRYBIO_WDLD_SPP), DRYBIO_WDLD_SPP/(jTotal - : object 'DRYBIO_WDLD_SPP' not found
+:::
+
+## Down woody material
+
+[rFIA::dwm()](https://rdrr.io/cran/rFIA/man/dwm.html) produces estimates of down woody material stocks. Estimates are returned by fuel class (duff, litter, 1HR, 10HR, 100HR, 1000HR, piles) for application in fuels management.
+
+**1HR fuels**: small, fine woody debris **10HR fuels**: medium, fine woody debris **100HR fuels**: large, fine woody debris **1000HR fuels**: coarse woody debris and slash piles **duff**: O horizon; all unidentifiable organic material above mineral soil, beneath litter **litter**: identifiable plant material which is downed and smaller than 10HR fuel class (1HR class includes standing herbaceous material).
+
+### downwoody {#downwoody}
+
+```{r downwoody}
+## Down woody material 
+downwoody <- rFIA::dwm(
+  db = database_variable,
+  byPlot = by_plot_variable,
+  polys = polys_variable,
+  method = method_variable,
+  nCores = cores_variable,
+  returnSpatial = TRUE,
+  totals = TRUE
+)
+saveRDS(downwoody, paste0(save_location, "downwoody.rds"))
+```
+
+## Invasive plant abundance
+
+The [rFIA::invasive()](https://rdrr.io/cran/rFIA/man/invasive.html) function produces estimates of the areal coverage (%) of invasive species and frequency of plots invasive species were detected in.
+
+### invasive {#invasive}
+
+```{r invasive}
+## invasive
+invasive <- rFIA::invasive(
+  db = database_variable,
+  byPlot = by_plot_variable,
+  polys = polys_variable,
+  method = method_variable,
+  nCores = cores_variable,
+  returnSpatial = TRUE,
+  totals = TRUE,
+  variance = TRUE # note error message: "Bad stratification, i.e., strata too small to compute variance of annual panels." 
+)
+saveRDS(invasive, paste0(save_location, "invasive.rds"))
+```
+
+## Stand structural stage distributions
+
+The [rFIA::standStruct()](https://rdrr.io/cran/rFIA/man/standStruct.html) function estimates forest structural stage distributions as percent forested land area in pole, mature, late, and mosaic stages and returns the stand structural stage distribution of an area of forest/timberland from FIA data.
+
+-   **Description:** Estimates of forest structural stage distributions as percent forested land area in pole, mature, late, and mosaic stages
+    -   <ins>Diameter Classes:</ins>
+
+        -   *Pole*: 11 - 25.9 cm
+        -   *Mature*: 26 - 45.9 cm
+        -   *Large*: 46+ cm
+
+    -   <ins>Structural Stage Classification:</ins>
+
+        -   *Pole Stage*: \> 67% BA in pole and mature classes, with more BA in pole than mature.
+        -   *Mature Stage*: \> 67% BA in pole and mature classes, with more BA in mature than pole OR \> 67% BA in mature and large classes, with more BA in mature.
+        -   *Late-Successional Stage:*: \> 67% BA in mature and large classes, with more in large.
+        -   *Mosiac:*: Any plot not meeting above criteria.
+
+### ss {#ss}
+
+```{r ss}
+## stand structural stage
+ss <- rFIA::standStruct(
+  db = database_variable,
+  byPlot = by_plot_variable,
+  polys = polys_variable,
+  method = method_variable,
+  nCores = cores_variable,
+  returnSpatial = TRUE,
+  totals = TRUE
+)
+saveRDS(ss, paste0(save_location, "ss.rds"))
+```
+
+# References
+
+Bechtold, W.A.; Patterson, P.L., eds. 2005. The Enhanced Forest Inventory and Analysis Program - National Sampling Design and Estimation Procedures. Gen. Tech. Rep. SRS - 80. Asheville, NC: U.S. Department of Agriculture, Forest Service, Southern Research Station. 85 p. <https://www.srs.fs.usda.gov/pubs/gtr/gtr_srs080/gtr_srs080.pdf>
+
+Cleland, D.T.; Freeouf, J.A.; Keys, J.E.; Nowacki, G.J.; Carpenter, C.A.; and McNab, W.H. 2007. Ecological Subregions: Sections and Subsections for the conterminous United States. Gen. Tech. Report WO-76D [Map on CD-ROM] (A.M. Sloan, cartographer). Washington, DC: U.S. Department of Agriculture, Forest Service, presentation scale 1:3,500,000; colored. <https://doi.org/10.2737/WO-GTR-76D>
+
+Dieffenbach, F. (2018). Appalachian National Scenic Trail forest health monitoring protocol, Natural Resource Report NPS/NETN/NRR—2018/1804. National Park Service, Fort Collins, Colorado. <https://irma.nps.gov/DataStore/DownloadFile/610353>
+
+Stanke, H., Finley, A. O., Weed, A. S., Walters, B. F., & Domke, G. M. (2020). rFIA: An R package for estimation of forest attributes with the US Forest Inventory and Analysis database. Environmental Modelling & Software, 127, 104664. <https://doi.org/10.1016/j.envsoft.2020.104664>
+
+Woodall, C.; Monleon, V.J., eds. 2007. Sampling Protocol, Estimation, and Analysis Procedures for the Down Woody Materials Indicator of the FIA Program. Gen. Tech. Rep. NRS - 22. Newtown Square, PA: U.S. Department of Agriculture, Forest Service, Northern Research Station. <https://www.nrs.fs.fed.us/pubs/gtr/gtr_nrs22.pdf>
+
+FIA Database User Guide: <https://www.fia.fs.fed.us/library/database-documentation/>
+
+# Revision History
+
+Version numbers will be incremented by a whole number (e.g., Version 1.3 to 2.0) when a change is made that significantly affects requirements or procedures. Version numbers will be incremented by decimals (e.g., Version 1.06 to Version 1.07) when there are minor modifications that do not affect requirements or procedures included in the protocol. Add rows as needed for each change or set of changes tied to an updated version number.
+
+**Revision History Log**
+
+| Version \# | Date      | Revised by               | Changes                                                                                                                                     | Justification                                                                                                                                                                                                                                                                                                                                                                            |
+|---------------|---------------|---------------|---------------|---------------|
+| 1.00       | July 2017 | Fred Dieffenbach         | Initial Version                                                                                                                             |                                                                                                                                                                                                                                                                                                                                                                                          |
+| 2.00       | May 2020  | Aaron Weed               | Updated and merged prior versions of SOPs 1 and 2 into this SOP to incorporate new R-based FIA data workflow utilizing ther `rFIA` package. | These changes were made because former workflow using MS Access downloads from FIA are no longer supported and because analysis workflow for estimating metrics was updated.                                                                                                                                                                                                             |
+| 3.00       | Feb 2024  | Jacob Gross & Aaron Weed | Revised so SOP and code to download, clip, and summarize the data tables are one and the same. Edits for clarity.                           | Former SOP was was like a tutorial on how to use rFIA functions. It was separate from APPA forest health report and quickly became out of date due to evolving nature of the rFIA package and the APPA Forest Health Rmarkdown report. New approach reduces the number of files/documents needing managed. And tables generated from SOP should feed directly into forest health report. |

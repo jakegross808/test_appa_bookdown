@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Appalachian National Scenic Trail Forest Health Monitoring - Standard Operating Procedures</title>
+  <meta name="description" content="<p>This is the standard operating procedures (SOP) and executable R code for generating US Forest Service - Forest Inventory and Analysis (FIA) datasets for the Appalachian National Scenic Trail Forest Health Monitoring Protocol (APPA).
+The HTML output format for this example is bookdown::gitbook,
+set in the _output.yml file.</p>" />
+  <meta name="generator" content="bookdown 0.37 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Appalachian National Scenic Trail Forest Health Monitoring - Standard Operating Procedures" />
+  <meta property="og:type" content="book" />
+  
+  <meta property="og:description" content="<p>This is the standard operating procedures (SOP) and executable R code for generating US Forest Service - Forest Inventory and Analysis (FIA) datasets for the Appalachian National Scenic Trail Forest Health Monitoring Protocol (APPA).
+The HTML output format for this example is bookdown::gitbook,
+set in the _output.yml file.</p>" />
+  <meta name="github-repo" content="rstudio/bookdown-demo" />
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Appalachian National Scenic Trail Forest Health Monitoring - Standard Operating Procedures" />
+  
+  <meta name="twitter:description" content="<p>This is the standard operating procedures (SOP) and executable R code for generating US Forest Service - Forest Inventory and Analysis (FIA) datasets for the Appalachian National Scenic Trail Forest Health Monitoring Protocol (APPA).
+The HTML output format for this example is bookdown::gitbook,
+set in the _output.yml file.</p>" />
+  
+
+<meta name="author" content="Northeast Temperate Network - National Park Service" />
+
+
+<meta name="date" content="2024-04-09" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+
+<link rel="next" href="download.html"/>
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+<link href="libs/anchor-sections-1.1.0/anchor-sections.css" rel="stylesheet" />
+<link href="libs/anchor-sections-1.1.0/anchor-sections-hash.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.1.0/anchor-sections.js"></script>
+<script src="libs/htmlwidgets-1.6.2/htmlwidgets.js"></script>
+<link href="libs/leaflet-1.3.1/leaflet.css" rel="stylesheet" />
+<script src="libs/leaflet-1.3.1/leaflet.js"></script>
+<link href="libs/leafletfix-1.0.0/leafletfix.css" rel="stylesheet" />
+<script src="libs/proj4-2.6.2/proj4.min.js"></script>
+<script src="libs/Proj4Leaflet-1.0.1/proj4leaflet.js"></script>
+<link href="libs/rstudio_leaflet-1.3.1/rstudio_leaflet.css" rel="stylesheet" />
+<script src="libs/leaflet-binding-2.2.1/leaflet.js"></script>
+
+
+<style type="text/css">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<style type="text/css">
+  
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">APPA SOP</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="1" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i><b>1</b> Background</a>
+<ul>
+<li class="chapter" data-level="1.1" data-path="index.html"><a href="index.html#forest-inventory-and-analysis-program-fia"><i class="fa fa-check"></i><b>1.1</b> Forest Inventory and Analysis Program (FIA)</a></li>
+<li class="chapter" data-level="1.2" data-path="index.html"><a href="index.html#sop-usage"><i class="fa fa-check"></i><b>1.2</b> SOP Usage</a>
+<ul>
+<li class="chapter" data-level="1.2.1" data-path="index.html"><a href="index.html#annotations"><i class="fa fa-check"></i><b>1.2.1</b> Annotations</a></li>
+<li class="chapter" data-level="1.2.2" data-path="index.html"><a href="index.html#run-vs.-render"><i class="fa fa-check"></i><b>1.2.2</b> Run vs. Render</a></li>
+<li class="chapter" data-level="1.2.3" data-path="index.html"><a href="index.html#run"><i class="fa fa-check"></i><b>1.2.3</b> Run .Rmd files</a></li>
+<li class="chapter" data-level="1.2.4" data-path="index.html"><a href="index.html#render"><i class="fa fa-check"></i><b>1.2.4</b> Render SOP</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="2" data-path="download.html"><a href="download.html"><i class="fa fa-check"></i><b>2</b> Download FIA</a>
+<ul>
+<li class="chapter" data-level="2.1" data-path="download.html"><a href="download.html#install-rfia-package"><i class="fa fa-check"></i><b>2.1</b> Install rFIA package</a>
+<ul>
+<li class="chapter" data-level="2.1.1" data-path="download.html"><a href="download.html#option-1-install-rfia-from-offical-repo-then-manually-fix-package"><i class="fa fa-check"></i><b>2.1.1</b> Option 1: Install rFIA from offical repo, then manually fix package:</a></li>
+<li class="chapter" data-level="2.1.2" data-path="download.html"><a href="download.html#option-2-install-rfia-from-alternative-repo"><i class="fa fa-check"></i><b>2.1.2</b> Option 2: Install rFIA from alternative repo:</a></li>
+</ul></li>
+<li class="chapter" data-level="2.2" data-path="download.html"><a href="download.html#setup-parallel-processing"><i class="fa fa-check"></i><b>2.2</b> Setup parallel processing</a></li>
+<li class="chapter" data-level="2.3" data-path="download.html"><a href="download.html#download-fia-data-for-each-state-intersecting-appa"><i class="fa fa-check"></i><b>2.3</b> Download FIA data for each state intersecting APPA</a>
+<ul>
+<li class="chapter" data-level="2.3.1" data-path="download.html"><a href="download.html#test-run"><i class="fa fa-check"></i><b>2.3.1</b> Test Run</a></li>
+<li class="chapter" data-level="2.3.2" data-path="download.html"><a href="download.html#save-location"><i class="fa fa-check"></i><b>2.3.2</b> Save location</a></li>
+<li class="chapter" data-level="2.3.3" data-path="download.html"><a href="download.html#download-all-fia-data-from-all-13-appa-states"><i class="fa fa-check"></i><b>2.3.3</b> Download all FIA data from all 13 APPA states:</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="clip.html"><a href="clip.html"><i class="fa fa-check"></i><b>3</b> Clip by Ecoregion</a>
+<ul>
+<li class="chapter" data-level="3.1" data-path="clip.html"><a href="clip.html#location-to-save-output"><i class="fa fa-check"></i><b>3.1</b> Location to save output</a></li>
+<li class="chapter" data-level="3.2" data-path="clip.html"><a href="clip.html#load-ecoregions-spatial-data"><i class="fa fa-check"></i><b>3.2</b> Load ‘Ecoregions’ spatial data</a>
+<ul>
+<li class="chapter" data-level="3.2.1" data-path="clip.html"><a href="clip.html#explore-ecoregion-levels"><i class="fa fa-check"></i><b>3.2.1</b> Explore ecoregion levels:</a></li>
+</ul></li>
+<li class="chapter" data-level="3.3" data-path="clip.html"><a href="clip.html#read-fia-data-into-r"><i class="fa fa-check"></i><b>3.3</b> Read FIA data into R</a></li>
+<li class="chapter" data-level="3.4" data-path="clip.html"><a href="clip.html#clip-fia-plots-by-ecoregion"><i class="fa fa-check"></i><b>3.4</b> Clip FIA plots by Ecoregion</a>
+<ul>
+<li class="chapter" data-level="3.4.1" data-path="clip.html"><a href="clip.html#ecosubsections"><i class="fa fa-check"></i><b>3.4.1</b> Ecosubsections</a></li>
+</ul></li>
+<li class="chapter" data-level="3.5" data-path="clip.html"><a href="clip.html#supporting-tables"><i class="fa fa-check"></i><b>3.5</b> Supporting tables</a>
+<ul>
+<li class="chapter" data-level="3.5.1" data-path="clip.html"><a href="clip.html#appalachian-trail-spatial-centerline-data"><i class="fa fa-check"></i><b>3.5.1</b> Appalachian trail spatial centerline data</a></li>
+<li class="chapter" data-level="3.5.2" data-path="clip.html"><a href="clip.html#appa-fia-plots"><i class="fa fa-check"></i><b>3.5.2</b> APPA FIA plots</a></li>
+<li class="chapter" data-level="3.5.3" data-path="clip.html"><a href="clip.html#subsections"><i class="fa fa-check"></i><b>3.5.3</b> Subsections</a></li>
+<li class="chapter" data-level="3.5.4" data-path="clip.html"><a href="clip.html#save-subsection-attributes"><i class="fa fa-check"></i><b>3.5.4</b> Save subsection attributes</a></li>
+<li class="chapter" data-level="3.5.5" data-path="clip.html"><a href="clip.html#save-centroids"><i class="fa fa-check"></i><b>3.5.5</b> Save centroids</a></li>
+<li class="chapter" data-level="3.5.6" data-path="clip.html"><a href="clip.html#save-plot-attributes"><i class="fa fa-check"></i><b>3.5.6</b> Save plot attributes</a></li>
+</ul></li>
+<li class="chapter" data-level="3.6" data-path="clip.html"><a href="clip.html#check-plot-attributes-final"><i class="fa fa-check"></i><b>3.6</b> Check plot attributes final</a></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="make.html"><a href="make.html"><i class="fa fa-check"></i><b>4</b> Make</a>
+<ul>
+<li class="chapter" data-level="4.1" data-path="make.html"><a href="make.html#load-data"><i class="fa fa-check"></i><b>4.1</b> Load data</a></li>
+<li class="chapter" data-level="4.2" data-path="make.html"><a href="make.html#save-location-1"><i class="fa fa-check"></i><b>4.2</b> Save location</a></li>
+<li class="chapter" data-level="4.3" data-path="make.html"><a href="make.html#metrics"><i class="fa fa-check"></i><b>4.3</b> Metrics</a>
+<ul>
+<li class="chapter" data-level="4.3.1" data-path="make.html"><a href="make.html#argument-variables"><i class="fa fa-check"></i><b>4.3.1</b> Argument Variables</a></li>
+<li class="chapter" data-level="4.3.2" data-path="make.html"><a href="make.html#population-estimate-method"><i class="fa fa-check"></i><b>4.3.2</b> Population estimate method</a></li>
+</ul></li>
+<li class="chapter" data-level="4.4" data-path="make.html"><a href="make.html#live-tree-abundance"><i class="fa fa-check"></i><b>4.4</b> Live tree abundance</a>
+<ul>
+<li class="chapter" data-level="4.4.1" data-path="make.html"><a href="make.html#tpa"><i class="fa fa-check"></i><b>4.4.1</b> tpa</a></li>
+<li class="chapter" data-level="4.4.2" data-path="make.html"><a href="make.html#tpa_spp"><i class="fa fa-check"></i><b>4.4.2</b> tpa_spp</a></li>
+<li class="chapter" data-level="4.4.3" data-path="make.html"><a href="make.html#tpa_spp_sizecl"><i class="fa fa-check"></i><b>4.4.3</b> tpa_spp_sizecl</a></li>
+<li class="chapter" data-level="4.4.4" data-path="make.html"><a href="make.html#biomass"><i class="fa fa-check"></i><b>4.4.4</b> biomass</a></li>
+</ul></li>
+<li class="chapter" data-level="4.5" data-path="make.html"><a href="make.html#species-diversity-of-live-trees"><i class="fa fa-check"></i><b>4.5</b> Species diversity of live trees</a>
+<ul>
+<li class="chapter" data-level="4.5.1" data-path="make.html"><a href="make.html#diversity"><i class="fa fa-check"></i><b>4.5.1</b> diversity</a></li>
+</ul></li>
+<li class="chapter" data-level="4.6" data-path="make.html"><a href="make.html#tree-growth-rates"><i class="fa fa-check"></i><b>4.6</b> Tree growth rates</a>
+<ul>
+<li class="chapter" data-level="4.6.1" data-path="make.html"><a href="make.html#growth"><i class="fa fa-check"></i><b>4.6.1</b> growth</a></li>
+</ul></li>
+<li class="chapter" data-level="4.7" data-path="make.html"><a href="make.html#forest-demographic-rates"><i class="fa fa-check"></i><b>4.7</b> Forest demographic rates</a>
+<ul>
+<li class="chapter" data-level="4.7.1" data-path="make.html"><a href="make.html#mortality"><i class="fa fa-check"></i><b>4.7.1</b> mortality</a></li>
+</ul></li>
+<li class="chapter" data-level="4.8" data-path="make.html"><a href="make.html#regeneration-abundance"><i class="fa fa-check"></i><b>4.8</b> Regeneration abundance</a>
+<ul>
+<li class="chapter" data-level="4.8.1" data-path="make.html"><a href="make.html#seedlings"><i class="fa fa-check"></i><b>4.8.1</b> seedlings</a></li>
+<li class="chapter" data-level="4.8.2" data-path="make.html"><a href="make.html#seedlings_spp"><i class="fa fa-check"></i><b>4.8.2</b> seedlings_spp</a></li>
+<li class="chapter" data-level="4.8.3" data-path="make.html"><a href="make.html#saplings"><i class="fa fa-check"></i><b>4.8.3</b> saplings</a></li>
+<li class="chapter" data-level="4.8.4" data-path="make.html"><a href="make.html#saplings_spp"><i class="fa fa-check"></i><b>4.8.4</b> saplings_spp</a></li>
+<li class="chapter" data-level="4.8.5" data-path="make.html"><a href="make.html#saplings_sizecl"><i class="fa fa-check"></i><b>4.8.5</b> saplings_sizecl</a></li>
+</ul></li>
+<li class="chapter" data-level="4.9" data-path="make.html"><a href="make.html#snags"><i class="fa fa-check"></i><b>4.9</b> Snags</a>
+<ul>
+<li class="chapter" data-level="4.9.1" data-path="make.html"><a href="make.html#snag_abundance"><i class="fa fa-check"></i><b>4.9.1</b> snag_abundance</a></li>
+<li class="chapter" data-level="4.9.2" data-path="make.html"><a href="make.html#dead_and_live_tpa"><i class="fa fa-check"></i><b>4.9.2</b> dead_and_live_tpa</a></li>
+<li class="chapter" data-level="4.9.3" data-path="make.html"><a href="make.html#snag_volume"><i class="fa fa-check"></i><b>4.9.3</b> snag_volume</a></li>
+</ul></li>
+<li class="chapter" data-level="4.10" data-path="make.html"><a href="make.html#down-woody-material"><i class="fa fa-check"></i><b>4.10</b> Down woody material</a>
+<ul>
+<li class="chapter" data-level="4.10.1" data-path="make.html"><a href="make.html#downwoody"><i class="fa fa-check"></i><b>4.10.1</b> downwoody</a></li>
+</ul></li>
+<li class="chapter" data-level="4.11" data-path="make.html"><a href="make.html#invasive-plant-abundance"><i class="fa fa-check"></i><b>4.11</b> Invasive plant abundance</a>
+<ul>
+<li class="chapter" data-level="4.11.1" data-path="make.html"><a href="make.html#invasive"><i class="fa fa-check"></i><b>4.11.1</b> invasive</a></li>
+</ul></li>
+<li class="chapter" data-level="4.12" data-path="make.html"><a href="make.html#stand-structural-stage-distributions"><i class="fa fa-check"></i><b>4.12</b> Stand structural stage distributions</a>
+<ul>
+<li class="chapter" data-level="4.12.1" data-path="make.html"><a href="make.html#ss"><i class="fa fa-check"></i><b>4.12.1</b> ss</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i><b>5</b> References</a></li>
+<li class="chapter" data-level="6" data-path="revision-history.html"><a href="revision-history.html"><i class="fa fa-check"></i><b>6</b> Revision History</a></li>
+<li class="divider"></li>
+<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Appalachian National Scenic Trail Forest Health Monitoring - Standard Operating Procedures</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="header">
+<h1 class="title">Appalachian National Scenic Trail Forest Health Monitoring - Standard Operating Procedures</h1>
+<p class="author"><em>Northeast Temperate Network - National Park Service</em></p>
+<p class="date"><em>2024-04-09</em></p>
+</div>
+<div id="background" class="section level1 hasAnchor" number="1">
+<h1><span class="header-section-number">Chapter 1</span> Background<a href="index.html#background" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<div id="forest-inventory-and-analysis-program-fia" class="section level2 hasAnchor" number="1.1">
+<h2><span class="header-section-number">1.1</span> Forest Inventory and Analysis Program (FIA)<a href="index.html#forest-inventory-and-analysis-program-fia" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>The U.S. Forest Service (USFS) administers the Forest Inventory and Analysis Program to acquire inventory data on U.S. forests. The program was launched following the McSweeney - McNary Forest Research Act of 1928 (P.L. 70-466) which led to the first forests being inventoried in 1930 (USFS 2012). Data collected by the program are valuable for a variety of purposes, including timber harvest and ecological health. According to the FIA website, “…FIA reports on status and trends in forest area and location; in the species, size, and health of trees; in total tree growth, mortality, and removals by harvest; in wood production and utilization rates by various products; and in forest land ownership…”FIA data are organized by state, but all state datasets conform to a consistent format. However, in order to use FIA data for the Appalachian National Scenic Trail (APPA), data must be re-aggregated to the APPA area of interest.</p>
+<p>This document describes how to use the <code>rFIA</code> R package (<a href="https://doi.org/10.1016/j.envsoft.2020.104664">Stanke et al. 2020</a>) to download USFS FIA data and estimate forest attributes described in the APPA Forest Health Protocol (<a href="https://irma.nps.gov/DataStore/Reference/Profile/2257434">Dieffenbach 2018</a>). The FIA program conducts annual (panel) inventories within each state. For the APPA region, this is most often a series of 5 annual, spatially unbiased inventories within each sampling cycle. This panel structure allows the FIA program to improve the precision of status and change estimates by leveraging previously collected data within an inventory cycle (e.g., estimate for 2015 may include data from annual inventories conducted from 2010-2015).</p>
+<p>This document illustrates how to use the functions in <code>rFIA</code> to:</p>
+<ol style="list-style-type: decimal">
+<li><p>Access FIA data</p></li>
+<li><p>Subset the FIA data frame to the APPA HUC10 Shell</p></li>
+<li><p>Produce the following estimates, typically at the plot- and ecoregion-scale:</p>
+<ul>
+<li><strong>Live tree abundance</strong>
+<ul>
+<li>TPA, BAA, biomass, and carbon by species</li>
+</ul></li>
+<li><strong>Species diversity of live trees</strong>
+<ul>
+<li>Shannon’s diversity, evenness, and richness</li>
+</ul></li>
+<li><strong>Tree vital rates</strong>
+<ul>
+<li>Annual diameter, basal area, and biomass growth by species</li>
+</ul></li>
+<li><strong>Forest demographic rates</strong>
+<ul>
+<li>Annual recruitment and mortality rates by species</li>
+</ul></li>
+<li><strong>Regeneration abundance</strong>
+<ul>
+<li>TPA of seedlings and saplings by species and size-class</li>
+</ul></li>
+<li><strong>Snag abundance</strong>
+<ul>
+<li>TPA, BAA, biomass, carbon, relative fraction</li>
+</ul></li>
+<li><strong>Down woody debris abundance</strong>
+<ul>
+<li>Volume, biomass, and carbon by fuel class</li>
+</ul></li>
+<li><strong>Invasive Plant abundance</strong>
+<ul>
+<li>% cover by species</li>
+</ul></li>
+<li><strong>Stand structural stage distributions</strong>
+<ul>
+<li>% area in pole, mature, and late stage forest</li>
+</ul></li>
+</ul></li>
+</ol>
+<p>This document does not describe the <a href="https://apps.fs.usda.gov/fia/datamart/datamart.html">FIA database structure</a> or demonstrate all of the functionality of the <code>rFIA</code> package functions. Readers should consult the documentation within the <code>rFIA</code> package for specific function details. Some additional rFIA references include:</p>
+<ul>
+<li><p>rFIA github page <a href="https://github.com/hunter-stanke/rFIA" class="uri">https://github.com/hunter-stanke/rFIA</a></p></li>
+<li><p>rFIA package documentation on CRAN: <a href="https://rdrr.io/cran/rFIA/" class="uri">https://rdrr.io/cran/rFIA/</a></p></li>
+<li><p>rFIA tutorials page: <a href="https://rfia.netlify.app/" class="uri">https://rfia.netlify.app/</a></p></li>
+</ul>
+</div>
+<div id="sop-usage" class="section level2 hasAnchor" number="1.2">
+<h2><span class="header-section-number">1.2</span> SOP Usage<a href="index.html#sop-usage" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>This SOP was written in <em>R</em> using <code>Rmarkdown</code> and the associated <code>bookdown</code> package. Each “Chapter” of this SOP (e.g. 1-Background, 2-Download, 3-Clip, etc.) is a separate <code>.Rmd</code> file that can be opened and executed to create the actual files and tables described within a chapter. The most recent, working copies of <code>.Rmd</code> files can be found within the (<a href="https://github.com/aaronweed/APPAForest">APPAForest github repo</a>) <!--# update link to match git hub repo where these files will ultimately reside -->. Because the SOP and the executable code are one and the same, when the R code within the .Rmd is updated, so is the SOP. Furthermore, when the supporting text describing the procedures are updated via the SOP text, the intent of the code should remain clear to the code editor. There are other advantages to the SOP and R code originated from the same source. Namely, this approach saves time (one location to update), reduces the chance of errors, and helps avoid the tendency of an SOP to become asynchronous and out of date with intended procedures.</p>
+<div id="annotations" class="section level3 hasAnchor" number="1.2.1">
+<h3><span class="header-section-number">1.2.1</span> Annotations<a href="index.html#annotations" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Several annotations are used throughout the SOP. Examples follow:</p>
+<div class="alert alert-danger">
+<p>These messages highlight broken code that requires a fix.</p>
+</div>
+<div class="alert alert-warning">
+<p>These messages highlight a choice made that may need further examination.</p>
+</div>
+<p>Blue code chunks like this highlight user input options to change functionality:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r user-input"><code class="sourceCode r"><span id="cb1-1"><a href="index.html#cb1-1" tabindex="-1"></a><span class="co"># User input needed in these code chunks</span></span>
+<span id="cb1-2"><a href="index.html#cb1-2" tabindex="-1"></a>example_variable <span class="ot">&lt;-</span> <span class="cn">TRUE</span></span></code></pre></div>
+</div>
+<div id="run-vs.-render" class="section level3 hasAnchor" number="1.2.2">
+<h3><span class="header-section-number">1.2.2</span> Run vs. Render<a href="index.html#run-vs.-render" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>To produce the desired APPA .csv files needed for the forest health report, you must <em>Run</em> the individual .Rmd files (see “<a href="index.html#run">Run .Rmd files</a>” section). However, to create the SOP document, you will need to <em>Render</em> all the .Rmd files together into one document (see “<a href="index.html#render">Render SOP</a>” section).</p>
+</div>
+<div id="run" class="section level3 hasAnchor" number="1.2.3">
+<h3><span class="header-section-number">1.2.3</span> Run .Rmd files<a href="index.html#run" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>The .Rmd files presented here need to be run in sequential order to produce the APPA FIA data files. Each .Rmd file (except for index.Rmd) has externally saved output (see table <a href="index.html#tab:rmd-output">1.1</a>) with the subsequent file utilizing the output from the previous file. The reason the .Rmd is split into different files (instead of one file) is because <code>01-download.Rmd</code> and <code>02-clip.Rmd</code> are time intensive (i.e. computer processor intensive) steps and the user will not want to run these steps more than once. The last .Rmd file, <code>03-make.Rmd</code>, selects the appropriate dataset details for use in the APPA report and will likely need periodic updates/edits. Separating <code>03-make.Rmd</code> from the first two steps allows the dataset details to be adjusted without having to redo the initial, time-intensive download and clip steps.</p>
+<p><strong>index.Rmd -</strong> This chapter, <strong>1 Background</strong>, is (and must be) named <code>index.Rmd</code> and contains important header information (not displayed in the final rendered SOP document) which tells R the desired parameters for how the document should be rendered (see “<a href="index.html#render">Render SOP</a>” section). All other <code>.Rmd</code> files are named according to their corresponding chapter names in this SOP. Note that <code>index.html</code> will be the homepage if the SOP document is rendered as a HTML file.</p>
+<p>To generate the APPA FIA data files, open a .Rmd file (starting with <code>01-download.Rmd</code>) and select <code>Run All</code> button from Rstudio or press <code>Ctrl + Alt + R</code>.</p>
+<table>
+<caption><span id="tab:rmd-output">Table 1.1: </span> The .Rmd files and the corresponding file dataset output.</caption>
+<colgroup>
+<col width="20%" />
+<col width="79%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>.Rmd</th>
+<th>Output</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>index.Rmd</td>
+<td>None</td>
+</tr>
+<tr class="even">
+<td>download.Rmd</td>
+<td>.csv files of FIA data for all APPA states (multiple FIA files per state)</td>
+</tr>
+<tr class="odd">
+<td>clip.Rmd</td>
+<td>one .csv file of all FIA plot data within APPA region</td>
+</tr>
+<tr class="even">
+<td>make.Rmd</td>
+<td>.csv files containing data for each FIA forest measurement type in APPA region.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="render" class="section level3 hasAnchor" number="1.2.4">
+<h3><span class="header-section-number">1.2.4</span> Render SOP<a href="index.html#render" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>If edits have been made to one or more of the .Rmd files, the SOP can be rendered as a new document (.pdf, .html, word doc).</p>
+<p>You can render the HTML version of this SOP in R by installing the `bookdown` package, opening the bookdown project file (located within the github repo. For example APPA_SOP.proj), then:</p>
+<ol style="list-style-type: decimal">
+<li><p>Find the <strong>Build</strong> pane in the RStudio IDE, and</p></li>
+<li><p>Click on <strong>Build Book</strong>, then select your output format, or select “All formats” if you’d like to use multiple formats from the same book source files.</p></li>
+</ol>
+<p>Or build the book from the R console:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="index.html#cb2-1" tabindex="-1"></a>bookdown<span class="sc">::</span><span class="fu">render_book</span>()</span></code></pre></div>
+<p>To render to a PDF as a <code>bookdown::pdf_book</code>, you’ll need to install XeLaTeX. You are recommended to install TinyTeX (which includes XeLaTeX): <a href="https://yihui.org/tinytex/" class="uri">https://yihui.org/tinytex/</a>.</p>
+<p><strong>Run and Render? -</strong> Note that when rendering the document the R code itself will not run because <code>eval = FALSE</code> in the code chunk at the beginning of the index.Rmd file.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="index.html#cb3-1" tabindex="-1"></a>knitr<span class="sc">::</span>opts_chunk<span class="sc">$</span><span class="fu">set</span>(</span>
+<span id="cb3-2"><a href="index.html#cb3-2" tabindex="-1"></a>  <span class="at">eval =</span> <span class="cn">FALSE</span></span>
+<span id="cb3-3"><a href="index.html#cb3-3" tabindex="-1"></a>)</span></code></pre></div>
+<p>If <code>eval = TRUE</code> all R code would run in addition to rendering the SOP document. This is not recommended as processes in the initial .Rmd files (downloading and clipping) are time-intensive and best run separately (see “<a href="index.html#run">Run .Rmd files</a>” section).</p>
+<p><strong>Preview SOP -</strong> R studio and bookdown offer different options to preview what the rendered document will look like in real time (updates as you edit) without having to render the entire document. You can start the live preview through the Rstudio interface by selecting the “visual” mode instead of “source” mode. Another option is to start the live preview directly from the R console:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="index.html#cb4-1" tabindex="-1"></a>bookdown<span class="sc">::</span><span class="fu">serve_book</span>()</span></code></pre></div>
+
+</div>
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+
+<a href="download.html" class="navigation navigation-next navigation-unique" aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"linkedin": false,
+"weibo": false,
+"instapaper": false,
+"vk": false,
+"whatsapp": false,
+"all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": "https://github.com/USERNAME/REPO/edit/BRANCH/index.Rmd",
+"text": "Edit"
+},
+"history": {
+"link": null,
+"text": null
+},
+"view": {
+"link": null,
+"text": null
+},
+"download": ["_main.pdf", "_main.epub"],
+"search": {
+"engine": "fuse",
+"options": null
+},
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+</body>
+
+</html>

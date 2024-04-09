@@ -1,0 +1,97 @@
+# Download FIA {#download}
+
+::: {.alert .alert-danger}
+Note that as of *03 Mar 2024* the `rFIA` R package has not been updated for approximately 1 year. Therefore, some functionality has been lost because the package is not being actively maintained. For example, downloading FIA data for multiple states using the `getFIA()` function currently results in an error due to recent updates to the online FIA database (FIA DataMart).
+:::
+
+Currently, there are two suggested work-arounds: 1) Download the outdated package and manually fix the source code, or 2) Download the rFIA package from an alternative repo with some fixes already applied. 
+
+## Install rFIA package
+
+### Option 1: Install rFIA from offical repo, then manually fix package:
+
+```{r rFIA-install-hunter, eval=FALSE}
+remotes::install_github("hunter-stanke/rFIA")
+library(rFIA)
+
+# Then, edit the source code of the package using the changes outlined here:
+# https://github.com/hunter-stanke/rFIA/pull/46/files
+```
+
+### Option 2: Install rFIA from alternative repo:
+
+Issue with multi-state download request fixed in this version below. But note that this copy is only supplied as a temporary solution and is also not being actively updated or maintained.
+
+```{r rFIA-install-jake}
+remotes::install_github("jakegross808/rFIA")
+library(rFIA)
+```
+
+## Setup parallel processing
+
+Setting up parallel processing in R may help with downloading extensive amounts of data from the FIA datamart:
+
+```{r parallel-processing}
+## How many physical cores do you have?
+parallel::detectCores(logical = FALSE) 
+
+## How many cores do you want to use?
+
+## If you still want to use your computer for anything else during the computations 
+## (e.g., checking your E-mails or writing a Word document), 
+## you should reserve at least one core for those remaining tasks.
+cores <- parallel::detectCores(logical = FALSE)-2 # set to use all physical cores minus number needed for other processes. 
+```
+
+## Download FIA data for each state intersecting APPA
+
+The `rFIA` function `getFIA()`(<https://rdrr.io/cran/rFIA/man/getFIA.html>) downloads State FIA Data from the FIA Datamart.
+
+### Test Run
+
+Use the small "test dataset" below to see if the function is working properly before downloading the very large Appalachian trail dataset. Test dataset consists of a small amount of FIA data from US territories, American Samoa and Guam.
+
+```{r download-test}
+
+## Small subset of FIA dataset to test 'getFIA()' before big download
+test <- c('AS', 'GU') # smallest datasets in 2023
+
+## If dir = NULL tables will not be saved on disk and only loaded into R environment
+test_FIA_db_object <- getFIA(states = test, dir = NULL, nCores = cores) 
+
+str(test_FIA_db_object)
+```
+### Save location
+
+Choose where local FIA database tables will be saved:
+
+```{r download-save-location, class.source=".user-input"}
+## default location:
+save_default <- './download_FIA/' 
+## Alternatively, enter specific custom location:
+save_custom <- 'C:/Users/JJGross/Documents/R_projects/FIA_data/allStates'
+
+## Specify `save_location <- save_custom` or `save_location <- save_default`
+save_location <- save_custom
+
+## Create directory if it doesn't already exist
+if (!dir.exists(save_location)) {dir.create(save_location)}
+```
+
+
+### Download all FIA data from all 13 APPA states:
+
+This is a large amount of data and depending on connection, may take more than an hour to complete. Note that `load = FALSE` saves the dataset to hard drive location instead of loading directly into R session. The dataset saved to the hard drive will be loaded into R using steps outlined in the next chapter. "[Clip](#clip)".
+
+Argument `common = TRUE` only imports the most commonly used FIA tables, including all those required for rFIA functions.
+
+```{r download-full}
+## APPA States
+at_states <- c('CT', 'GA', 'ME', 'MD', 'MA', 
+               'NH', 'NJ', 'NY', 'NC', 'PA', 
+               'TN', 'VT', 'VA')
+
+## Download the data:
+getFIA(states = at_states, dir = save_location, 
+       nCores = cores, common = TRUE, load = FALSE) 
+```

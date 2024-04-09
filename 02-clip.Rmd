@@ -1,0 +1,613 @@
+# Clip by Ecoregion {#clip}
+
+```{r libraries, eval=TRUE, include=FALSE}
+library(tidyverse)
+library(rFIA)
+library(sf)
+library(leaflet)
+```
+
+## Location to save output
+
+```{r clip-save-location, eval=TRUE, class.source=".user-input"}
+## default location:
+save_default <- './clip_FIA/' 
+## Alternatively, enter specific custom location:
+save_custom <- 'C:/Users/JJGross/Documents/R_projects/FIA_data/clip_FIA/'
+
+## Specify `save_location <- save_custom` or `save_location <- save_default`
+save_location <- save_custom
+
+## Create directory if it doesn't already exist
+if (!dir.exists(save_location)) {dir.create(save_location)}
+```
+
+## Load 'Ecoregions' spatial data
+
+Load in a file containing hierarchical spatial categories, or levels, of polygons surrounding the Appalachian National Scenic Trail (more info on how this file was created can be found in APPA Forest Health FIA Narrative). The hierarchical spatial levels (from smallest to largest) include ecological subsections, ecological sections, and provinces (all collectively referred to as ecoregions here). The APPA Ecoregions dataset can be downloaded from IRMA: [APPA_Ecoregions_USFS_HUC10_Shell_AEA](https://irma.nps.gov/DataStore/Reference/Profile/2259589)
+
+```{r load-eco-path, eval=TRUE, class.source=".user-input"}
+load_eco_path <- "C:/Users/JJGross/Downloads/APPA_Ecoregions_USFS_HUC10_Shell_AEA"
+```
+
+Read the shapefile using `read_sf()` from the `sf` (simple features) package.
+
+```{r load-eco, eval=TRUE}
+eco_shapefile <- sf::read_sf(dsn = load_eco_path, 
+                   layer = 'APPA_Ecoregions_USFS_HUC10_Shell_AEA')
+```
+
+
+### Explore ecoregion levels:
+
+```{r eco-subsections, eval=TRUE, echo=TRUE}
+plot(eco_shapefile["SUBSECTION"])
+plot(eco_shapefile["SECTION_NA"])
+
+## SUBSECTIONS:
+n_distinct(eco_shapefile$SUBSECTION)
+levels(as.factor(eco_shapefile$SUBSECTION))
+
+## SUBSECTI_1:
+levels(as.factor(eco_shapefile$SUBSECTI_1)) 
+n_distinct(eco_shapefile$SUBSECTI_1)
+
+## Note that 'SUBSECTI_1' names are not unique - there are two different "Northern Piedmont"
+eco_shapefile %>%
+  filter(SUBSECTI_1 == "Northern Piedmont") %>%
+  select(SUBSECTI_1, SUBSECTION, SECTION_NA, PROVINCE_N) %>%
+  sf::st_drop_geometry() 
+
+eco_shapefile <- eco_shapefile %>%
+  mutate(SUBSECTI_1 = case_when(
+    SUBSECTI_1 == "Northern Piedmont" & SUBSECTION == "M211Ba" ~ "New Engl. Northern Piedmont",
+    SUBSECTI_1 == "Northern Piedmont" & SUBSECTION == "221De" ~ "Appal. Northern Piedmont",
+    .default = as.character(SUBSECTI_1)))
+```
+
+::: {.alert .alert-warning}
+Note that `SUBSECTI_1` names are not unique. There are two different subsections both named "Northern Piedmont". See current re-name solution above. 
+:::
+
+```{r eco-province, eval=TRUE, echo=TRUE}
+## Distinct SECTION_NA:
+n_distinct(eco_shapefile$SECTION_NA)
+levels(as.factor(eco_shapefile$SECTION_NA))
+
+## Distinct PROVINCE_N:
+n_distinct(eco_shapefile$PROVINCE_N)
+levels(as.factor(eco_shapefile$PROVINCE_N))
+```
+
+
+## Read FIA data into R
+
+Load the FIA data stored locally (From "[Download](#download) Chapter) into R session.
+
+```{r clip-load-location, eval=TRUE, class.source=".user-input"}
+## load from default location (specified in 01-Download.Rmd chapter):
+load_default <- './download_FIA/' 
+## Alternatively, enter specific custom location:
+load_custom <- 'C:/Users/JJGross/Documents/R_projects/FIA_data/allStates'
+
+load_location <- load_custom
+#load_location <- load_default
+
+## Change number of processing cores used, if desired
+cores <- parallel::detectCores(logical = FALSE)-2 
+```
+
+Read the FIA data stored locally (From "[Download](#download) Chapter) using the [ReadFIA()](https://rdrr.io/cran/rFIA/man/readFIA.html) function.
+
+```{r APPA-report-clip, eval=TRUE}
+## Specify the 13 APPA states by state code (this is extra insurance that the wrong states are not loaded, if other states have been downloaded to same directory)
+at_states <- c('CT', 'GA', 'ME', 'MD', 'MA', 
+               'NH', 'NJ', 'NY', 'NC', 'PA', 
+               'TN', 'VT', 'VA')
+
+## Read FIA data 
+at_states_FIA <- readFIA(dir = load_location, states = at_states, nCores = cores)
+```
+
+## Clip FIA plots by Ecoregion
+
+[clipFIA()](https://rdrr.io/cran/rFIA/man/clipFIA.html) performs space-time queries on Forest Inventory and Analysis Database (FIADB). `clipFIA` subsets the dataset to include only data associated with particular inventory years (i.e., most recent), and/or only data within a user-defined region.
+
+Spatially, the `mask = eco` argument below selects only the `at_states_FIA` FIA plots which fall within the perimeter of the `eco` spatial extent (i.e. the outer boundary of the ecoregion polygons).
+
+Temporally, the `mostRecent` argument returns only data for most recent inventory if set to `TRUE`
+
+```{r clip-FIA, eval=TRUE, echo=TRUE}
+## Restrict to most recent inventory
+at_FIA_MR <- clipFIA(at_states_FIA, matchEval = TRUE, mostRecent = TRUE, mask = eco_shapefile)
+saveRDS(at_FIA_MR, file = paste0(save_location, "at_FIA_MR.rds"))
+
+## Access all inventories
+at_FIA <- clipFIA(at_states_FIA, matchEval = TRUE, mostRecent = FALSE, mask = eco_shapefile)
+saveRDS(at_FIA, file = paste0(save_location, "at_FIA.rds"))
+```
+
+Note the argument `matchEval = TRUE` in the above function. The [clipFIA()](https://rdrr.io/cran/rFIA/man/clipFIA.html) documentation states that:
+
+> "if `matchEval = TRUE`, `clipFIA()` returns a subset of data for which there are matching reporting years across 
+> states. Only useful if db contains multiple state subsets of the FIA database."
+
+This seems appropriate for the Appalachian Trail dataset, but when compared (12 March 2024), both `matchEval = TRUE` and `matchEval = FALSE` appeared to result in the same output. This may have something to do with the method that is used (e.g. 'Annual'"' vs 'TI'). Further evaluation is needed. 
+
+::: {.alert .alert-warning}
+Note that currently matchEval argument is set to `matchEval = TRUE` for both `at_FIA` and `at_FIA_MR`. Confirm this is appropriate. 
+:::
+
+### Ecosubsections
+
+It is important to note the column `ECOSUBCD` which is part of the native FIA database and referenced in the [FIA Database User Guide](https://www.fs.usda.gov/research/understory/forest-inventory-and-analysis-database-user-guide-phase-2). The `ECOSUBCD` column can be included in the output of most `rFIA` functions with the argument `grpBy = c(ECOSUBCD)`. The FIA database guide states that subsection codes for the conterminous United States were developed as part of the "Ecological Subregions: Sections and Subsections for the Conterminous United States" publication (Cleland et al. 2007).
+
+Conversely, the same ecoregional subsection code can be found within the `APPA_Ecoregions_USFS_HUC10_Shell_AEA` shapefile column `eco$SUBSECTION` along with additional related columns - for example, the full subsection name in the `SUBSECTI_1` column. These columns (and others added below) are appended to the FIA dataset during most rFIA functions by way of the `polys = eco`. For this reason the `polys = eco`argument is often more advantageous than the `grpBy = c(ECOSUBCD)` and the `polys = eco`argument is utilized throughout the make.Rmd chapter.
+
+Note that this `polys = eco` argument is different than the `rFIA::clipFIA(mask = eco)` function/argument which only clips the plot data by the eco mask (outer spatial boundary) and does not append any data.
+
+## Supporting tables
+
+### Appalachian trail spatial centerline data
+
+```{r at_centerline}
+## Manually downloaded `Appalachian_National_Scenic_Trail.shp` from `APPAForesthealthReport` repo. 
+centerline_shapefile_location <- "move_to_server/at_centerline/" 
+
+## read in shapefile of Appalachian trail center-line
+ at_centerline <- sf::st_read(paste0(centerline_shapefile_location, "Appalachian_National_Scenic_Trail.shp")) %>%
+   mutate(region_3cl = case_when(
+     Region == "New England" ~ "Northeast",
+     Region == "Mid-Atlantic" ~ "Mid-Atlantic",
+     Region %in% c("Southern", "Virginia") ~ "Southeast"
+   ))
+
+saveRDS(at_centerline, paste0(save_location, "at_centerline.rds"))
+```
+
+::: {.alert .alert-danger}
+`Appalachian_National_Scenic_Trail.shp` currently saved within `APPAForesthealthReport` repo. In future move this to appropriate location (e.g. IRMA).
+:::
+
+###  APPA FIA plots
+
+Note that the `rFIA::tpa()` function was used below to calculate and construct tables for APPA FIA plot-level attributes (e.g. elevation, etc.). TPA was selected because it is a core metric of FIA methods and should be present in all field visited plots. 
+
+```{r query-APPA-plots, eval=TRUE, echo=TRUE}
+## Get plot-level data for the most recent tpa dataset
+tpa_plots_MR <- rFIA::tpa(at_FIA_MR, 
+                          byPlot = TRUE, 
+                          grpBy = c(STATECD, ECOSUBCD, ELEV),
+                          returnSpatial = TRUE) 
+
+## Get plot-level data for full tpa dataset  
+tpa_plots <- rFIA::tpa(at_FIA, 
+                       byPlot = TRUE, 
+                       grpBy = c(STATECD, ECOSUBCD, ELEV),
+                       returnSpatial = TRUE) 
+
+## Get only the unique plot locations (pltID)
+## i.e. exclude the revisits 
+tpa_plots_by_year <- tpa_plots |>
+  # HAVE TO DO BIND ROWS HERE BECAUSE `tpa_plots' SUPRISINGLY DOES NOT 
+  # CONTAIN ALL PLOTS FOUND IN `tpa_plots_MR'.
+  # Error with rFIA discussed below
+  dplyr::bind_rows(tpa_plots_MR) |>
+  dplyr::group_by(PLT_CN) |> #PLT_CN is each unique event, while pltID is each unique plot location
+  distinct()
+
+## Get only the unique plot locations (pltID)
+## i.e. exclude the revisits 
+tpa_plots_distinct <- tpa_plots_by_year |>
+  select(pltID, STATECD, ECOSUBCD, ELEV, geometry) %>%
+  distinct()
+```
+
+Display APPA FIA plots by eco-subsection and southern most plot used to calculated distance. 
+
+```{r plot-map-southpoint, eval=TRUE, echo=TRUE}
+## Select Southern-most plot
+most_S_plot <- tpa_plots_distinct %>%
+  filter(pltID == "5_13_85_5")
+
+## ecosubsection colors
+ecosubCol <- colorFactor(rainbow(51), tpa_plots_distinct$ECOSUBCD)
+## leaflet map
+tpa_plots_distinct %>%  
+  leaflet() %>%
+  addTiles() %>%
+  addCircleMarkers(
+    color = ~ecosubCol(ECOSUBCD),
+    stroke = FALSE, fillOpacity = 1,
+    radius = 4) %>%
+  addMarkers(data = most_S_plot)
+```
+Calculate each plot's distance from southern point for use in displaying data as transect along axis.
+
+```{r calc-plot-dist, eval=TRUE, echo=TRUE}
+tpa_plots_distance <- tpa_plots_distinct |>
+  mutate(S_plot = most_S_plot$geometry) |> # add south point
+  mutate(dist_unit = sf::st_distance(
+    S_plot, geometry, by_element = TRUE)) |> # calculate distance
+  mutate(distance_m = round(as.numeric(dist_unit))) |>
+  select(-S_plot, -dist_unit)
+
+## Create a continuous palette function
+dist_pal <- colorNumeric(palette = "Blues", domain = tpa_plots_distance$distance_m)
+## leaflet map
+tpa_plots_distance %>%  
+  leaflet() %>%
+  addTiles() %>%
+  addCircleMarkers(
+    color = ~dist_pal(distance_m),
+    stroke = FALSE, fillOpacity = 1,
+    radius = 4) %>%
+  addMarkers(data = most_S_plot)
+```
+
+Demo usage of plot attributes
+
+```{r plot-attributes, eval=TRUE, echo=TRUE}
+plot_attributes <- tpa_plots_distance
+
+# Demo plot distance x elevation
+plot_attributes |>
+  group_by(ECOSUBCD)|>
+  mutate(median_dist = median(distance_m)) |>
+  mutate(median_elev = median(ELEV)) |>
+  ggplot(aes(x= fct_reorder(ECOSUBCD, distance_m), 
+             y=ELEV, 
+             fill = as.factor(median_elev))) +
+  geom_boxplot() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        legend.position = 'none') +
+  xlab("Ecosubsection (from SW to NE)") + ylab("Plot Elevation") 
+```
+
+#### Check Plot Counts
+
+Perform some checks on records within tpa dataset - helps gauge dataset changes. Can also add quality assurance checks here:
+
+```{r tpa-plot-check, eval=TRUE, echo=TRUE}
+
+## Check that entire dataset (at_plots) contains most recent dataset (at_plots_MR) 
+tpa_chk <- sf::st_drop_geometry(tpa_plots)
+tpa_chk_MR <- sf::st_drop_geometry(tpa_plots_MR)
+
+MRplots_not_in_full_tpa_dataset <- anti_join(tpa_chk_MR, tpa_chk, by = join_by(pltID))
+if (nrow(MRplots_not_in_full_tpa_dataset) != 0) {
+  warning("tpa_plots does not contain all plots found in tpa_plots_MR (most recent) dataset")
+}
+
+## total events/visits
+tpa_event_count <- nrow(tpa_chk) 
+tpa_event_count # 12,457
+
+## total plot locations
+tpa_plot_count <- length(unique(tpa_chk$pltID)) 
+tpa_plot_count # 4,328
+
+tpa_plots_summary <- tpa_chk |>
+  group_by(pltID) |>
+  summarise(visits = n()) |>
+  group_by(visits) |>
+  summarize(n_plots = n())
+
+tpa_plots_summary
+## In 2022 
+#      1     571 (571 plots measured once)
+#      2     781 (781 plots measured twice)
+#      3    1590
+#      4    1376
+#      5      10
+
+## total events/visits
+tpa_event_count_MR <- nrow(tpa_chk_MR) 
+tpa_event_count_MR # 3,980
+
+## total plot locations
+tpa_plot_count_MR <- length(unique(tpa_chk_MR$pltID)) 
+tpa_plot_count_MR # 3,980
+
+if (tpa_event_count_MR != tpa_plot_count_MR) {
+  warning("some plots not unique in most recent (MR) dataset")
+}
+```
+
+::: {.alert .alert-danger}
+Possible error with rFIA: tpa_plots (full dataset) does not contain all plots found in tpa_plots_MR (most recent) dataset" see `MRplots_not_in_full_tpa_dataset` for table of missing plots. 
+:::
+
+### Subsections
+
+####  Check subsections
+
+```{r compare-ecoshapefile-ECOSUBCD, eval=TRUE, echo=TRUE}
+tpa_ECOSUBCD_distinct <- tpa_plots_distinct |>
+  sf::st_drop_geometry() |>
+  distinct(ECOSUBCD)
+
+## Eco shapefile:
+eco <- eco_shapefile %>%
+  full_join(tpa_ECOSUBCD_distinct, by = c("SUBSECTION" = "ECOSUBCD")) %>%
+  sf::st_transform('+proj=longlat +datum=WGS84')
+
+## return all rows from eco_shapefile without a match in FIA_plots
+## These are subsections with no FIA plots:
+dplyr::anti_join(eco, tpa_ECOSUBCD_distinct, by = join_by(SUBSECTION == ECOSUBCD))
+
+## return all rows from FIA_plots without a match in eco_shapefile
+## These rows are locations with FIA plots but no subsection included in shapefile:
+eco %>% filter(is.na(SECTION)) 
+```
+
+#### Missing eco$SUBSECTION info
+::: {.alert .alert-danger}
+Note that `eco` shapefile is missing information for SUBSECTION `M211Aa - International Boundary Plateau`. This needs to be fixed in original shapefile. 
+:::
+
+Temporary fix here:
+
+```{r eco-M211Aa, eval=TRUE, echo=TRUE}
+## missing info found by google search of "M211Aa"
+# https://www.fs.usda.gov/research/publications/misc/73326-wo-gtr-76d-cleland2007.pdf
+missing_subsection <- data.frame(
+  PROVINCE = "M211", 
+  SECTION = "M211A", 
+  SUBSECTION = "M211Aa", 
+  SECTION_NA = "White Mountains",
+  SUBSECTI_1 = "International Boundary Plateau")
+
+eco <- eco |>
+  filter(SUBSECTION != "M211Aa") |>
+  bind_rows(missing_subsection)
+```
+
+#### Calculate n plots
+Calculate plots per subsection and median elevation and distance for all and most recent (MR) datasets
+
+```{r subsection-n-plots, eval=TRUE, echo=TRUE}
+# calculate plots per subsection
+plot_attributes_drop_geo <- plot_attributes %>%
+  sf::st_drop_geometry()
+
+n_plots_tpa_MR <- tpa_plots_MR |>
+  sf::st_drop_geometry() |>
+  left_join(plot_attributes_drop_geo, 
+            by = join_by(pltID, STATECD, ECOSUBCD, ELEV)) |>
+  group_by(ECOSUBCD) |>
+  summarize(n_plots_subsect_MR = n(),
+            median_elevation_MR = median(ELEV),
+            median_distance_MR = median(distance_m))
+
+n_plots_tpa <- tpa_plots |>
+  sf::st_drop_geometry() |>
+  left_join(plot_attributes_drop_geo, 
+            by = join_by(pltID, STATECD, ECOSUBCD, ELEV)) |>
+  group_by(ECOSUBCD) |>
+  summarize(n_plots_subsect = n(),
+            median_elevation = median(ELEV),
+            median_distance = median(distance_m))
+```
+#### Add states and subsection abbreviations
+
+Shorter subsection names with states they occur in. 
+
+```{r subsection-abbr, eval=TRUE, echo=TRUE}
+## Read in state code names
+state_codes <- read_csv("move_to_server/us-state-ansi-fips.csv", show_col_types = FALSE) %>%
+  mutate(st = as.integer(st))
+
+## Get all subsections in one dataset (subsections from FIA + eco shapefile)
+## Have to join because these can be different if subsection missing from eco shapefile
+## or FIA data not collected for a subsection
+subsections_per_state <- plot_attributes_drop_geo |>
+  select(STATECD, ECOSUBCD) |>
+  distinct() |>
+  right_join(eco, by = join_by(ECOSUBCD == SUBSECTION))
+
+subsections_all <- subsections_per_state |>
+  select(-STATECD) |>
+  group_by(ECOSUBCD) |>
+  distinct()
+
+## Get list of which states a subsection occurs - will help with data viz interpretation later
+subsection_state_list <- subsections_per_state |>
+  select(STATECD, ECOSUBCD) |>
+  distinct() |>
+  left_join(state_codes, by = join_by(STATECD == st)) |>
+  select(-STATECD, -stname) |>
+  arrange(stusps) |>
+  pivot_wider(names_from = stusps, values_from = stusps) |>
+  unite("states", CT:VT, remove = FALSE, na.rm = TRUE, sep = " ") |>
+  mutate(states = paste0("(",states,")")) |>
+  select(ECOSUBCD, states)
+
+## Abbrivations to shorten subsection names
+replace_list <- (c("Mountain" = "Mt", 
+                  "Central" = "C.", 
+                  "Northern" = "N.",
+                  "Southern" = "S.",
+                  "Eastern" = "E.",
+                  "New Brunswick" = "NB",
+                  "Lowlands" = "Lowl.",
+                  "Lowland" = "Lowl.",
+                  "Uplands" = "Upl.",
+                  "Upland" = "Upl.",
+                  "Plateau" = "Plat.",
+                  "Piedmont" = "Pdmt",
+                  "Blue" = "Bl.",
+                  "Ridge" = "Rdg",
+                  "Valley" = "Vly",
+                  "Maine" = "ME",
+                  "Connecticut" = "CT",
+                  "Vermont" = "VT",
+                  "Virginia" = "VA",
+                  "Western" = "W.",
+                  "Glacial Lake and Marine Plains" = "GL/MP",
+                  "Hills and Plains" = "",
+                  "Kittatinny-Shawangunk" = "Kitt-Shaw",
+                  "Metasedimentary" = "Meta",
+                  "Mahoosic Rangely Lakes" = "Mahoo/Rng Lks",
+                  "Highlands" = "Highl.",
+                  "Hudson" = "Hud.",
+                  "Limestone" = "Limstn",
+                  "Gettysburg" = "Getty",
+                  "Sebago-Ossipee" = "Seb-Ossipee",
+                  "Berkshire" = "Berk",
+                  "Embayment" = "Embaymt",
+                  "International" = "Int.",
+                  "Plateau" = "Plat."
+                  ))
+
+subsections_abbr <- subsections_all |>
+  left_join(subsection_state_list, by = join_by(ECOSUBCD)) |>
+  mutate(SUBSECT_ABBR = str_replace_all(SUBSECTI_1, replace_list)) |>
+  unite("SUBSECT_ABBR_ST", SUBSECT_ABBR:states, remove = FALSE, na.rm = TRUE, sep = " ") 
+```
+
+### Save subsection attributes
+
+```{r save-subsection-attributes, eval=TRUE, echo=TRUE}
+# append n plot counts for entire dataset and most recent
+subsection_attributes <- subsections_abbr |>
+  left_join(n_plots_tpa, by = join_by(ECOSUBCD)) |>
+  left_join(n_plots_tpa_MR, by = join_by(ECOSUBCD))
+
+saveRDS(subsection_attributes, file = paste0(save_location, "subsection_attributes.rds"))
+```
+
+### Save centroids
+
+```{r save-centroids, eval=TRUE, echo=TRUE}
+section_centroids <- subsection_attributes |>
+  sf::st_as_sf() |>
+  group_by(SECTION_NA) |>
+  summarise(geometry = sf::st_union(geometry)) |>
+  sf::st_centroid() |>
+  mutate(X = sf::st_coordinates(geometry)[,1],
+         Y = sf::st_coordinates(geometry)[,2])
+
+str(section_centroids)
+
+subsection_centroids <- subsection_attributes |>
+  sf::st_as_sf() |>
+  sf::st_centroid()
+
+## leaflet map
+ecosubCol <- colorFactor(rainbow(51), subsection_attributes$SUBSECT_ABBR)
+
+subsection_attributes |> 
+  sf::st_as_sf() |>
+  leaflet() |>
+  addTiles() |>
+  addPolygons(color = ~ecosubCol(SUBSECT_ABBR), label = ~SUBSECT_ABBR) |>
+  addCircleMarkers(data = subsection_centroids, 
+                   color = ~ecosubCol(SUBSECT_ABBR),
+                   stroke = FALSE, fillOpacity = 1,
+                   radius = 10, label = ~SUBSECT_ABBR) |>
+  addCircleMarkers(data = section_centroids, 
+                   color = "black", 
+                   stroke = FALSE, fillOpacity = 1,
+                   radius = 10, label = ~SECTION_NA)
+  
+saveRDS(section_centroids, file = paste0(save_location, "section_centroids.rds"))
+saveRDS(subsection_centroids, file = paste0(save_location, "subsection_centroids.rds"))
+```
+
+::: {.alert .alert-danger}
+A centroid file was in original repo - but not sure how it was created - took a stab here. Check map above to see if method was acceptable. 
+:::
+
+### Save plot attributes
+
+```{r save-plot-attributes, eval=TRUE, echo=TRUE}
+# create list of abbreviated subsection to append to plot attributes table
+sub_attributes_for_plots <- subsection_attributes %>%
+  select(ECOSUBCD, PROVINCE, SECTION, DOMAIN_NAM, DIVISION_N, PROVINCE_N,
+         SECTION_NA, SUBSECTI_1,ATIntersec,
+         SUBSECT_ABBR, SUBSECT_ABBR_ST, states)
+
+## Plot attributes unique locations  
+plot_attributes_final <- plot_attributes |>
+  right_join(sub_attributes_for_plots, by = join_by(ECOSUBCD)) |>
+  select(-STATECD) 
+
+## Plot attributes by year
+plot_attributes_drop_geom <- plot_attributes_final |>
+  sf::st_drop_geometry()
+plot_attributes_by_year_final <- tpa_plots_by_year |>
+  select(YEAR, pltID) |>
+  left_join(plot_attributes_drop_geom, by = join_by(pltID))
+
+saveRDS(plot_attributes_final, file = paste0(save_location, "plot_attributes_locations.rds")) 
+saveRDS(plot_attributes_by_year_final, file = paste0(save_location, "plot_attributes_by_year.rds")) 
+```
+
+#### join subsection attributes to eco
+
+```{r join-subsect-attr-eco, message=FALSE}
+eco_final <- eco |>
+  left_join(subsection_attributes)
+
+saveRDS(eco_final, file = paste0(save_location, "eco.rds")) 
+```
+
+
+## Check plot attributes final
+
+Note the new Ecosubsection names and ability to detect subsections without FIA plots
+
+```{r viz-plot-attributes-final, eval=TRUE, echo=TRUE}
+# Visualize plot distance x elevation with plot_attributes_final
+plot_attributes_final_graph <- na.omit(plot_attributes_final)
+
+plots_na <- plot_attributes_final |>
+  filter(is.na(pltID)) |>
+  pull(SUBSECT_ABBR)
+plots_na <- paste("Subsections without plot data:", paste(plots_na, collapse = ", "))
+
+plot_attributes_final_graph |>
+  group_by(ECOSUBCD)|>
+  mutate(median_dist = median(distance_m)) |>
+  mutate(median_elev = median(ELEV)) |>
+  ggplot(aes(x= fct_reorder(SUBSECT_ABBR_ST, distance_m), 
+             y=ELEV, 
+             fill = as.factor(median_elev))) +
+  geom_boxplot() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        legend.position = 'none') +
+  xlab("Ecosubsection (from SW to NE)") + ylab("Plot Elevation") +
+  labs(caption = plots_na)
+```
+## Vizualize plots per year
+
+```{r viz-plots-per-year}
+# Visualize number of plots per subsection per year
+n_plots_per_year <- tpa_plots |>
+  sf::st_drop_geometry() |>
+  group_by(ECOSUBCD, YEAR) |>
+  summarize(n_plots_per_year = n(), .groups = 'drop') |>
+  right_join(subsection_attributes, by = join_by(ECOSUBCD))
+
+n_plots_per_year_graph <- na.omit(n_plots_per_year)
+
+n_plots_per_year_graph %>%
+  mutate(highlight = case_when(n_plots_per_year == 1 ~ "1 plot",
+                               n_plots_per_year == 2 ~ "2 plots",
+                               .default = NA)) %>%
+  ggplot(aes(x=forcats::fct_reorder(SUBSECT_ABBR_ST, median_distance), 
+             y=YEAR, 
+             size = n_plots_per_year, 
+             color = highlight)) +
+  geom_count() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  scale_size_area() +
+  scale_color_manual(values = c("red2", "cyan3", "grey50"),
+                     breaks = c("1 plot", "2 plots")) +
+  xlab("Ecosubsection (from SW to NE)") +
+  labs(caption = plots_na)
+```
+
+
+

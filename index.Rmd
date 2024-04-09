@@ -1,0 +1,152 @@
+---
+title: "Appalachian National Scenic Trail Forest Health
+Monitoring - Standard Operating Procedures"
+author: "Northeast Temperate Network - National Park Service"
+date: "`r Sys.Date()`"
+site: bookdown::bookdown_site
+documentclass: book
+bibliography: [book.bib, packages.bib]
+# url: your book url like https://bookdown.org/yihui/bookdown
+# cover-image: path to the social sharing image like images/cover.jpg
+description: |
+  This is the standard operating procedures (SOP) and executable R code for generating US Forest Service - Forest Inventory and Analysis (FIA) datasets for the Appalachian National Scenic Trail Forest Health Monitoring Protocol (APPA).
+  The HTML output format for this example is bookdown::gitbook,
+  set in the _output.yml file.
+link-citations: yes
+github-repo: rstudio/bookdown-demo
+---
+
+```{r knitr-options, include=FALSE}
+knitr::opts_chunk$set(
+  eval = FALSE
+)
+```
+
+
+# Background
+
+## Forest Inventory and Analysis Program (FIA)
+
+The U.S. Forest Service (USFS) administers the Forest Inventory and Analysis Program to acquire inventory data on U.S. forests. The program was launched following the McSweeney - McNary Forest Research Act of 1928 (P.L. 70-466) which led to the first forests being inventoried in 1930 (USFS 2012). Data collected by the program are valuable for a variety of purposes, including timber harvest and ecological health. According to the FIA website, “…FIA reports on status and trends in forest area and location; in the species, size, and health of trees; in total tree growth, mortality, and removals by harvest; in wood production and utilization rates by various products; and in forest land ownership…”FIA data are organized by state, but all state datasets conform to a consistent format. However, in order to use FIA data for the Appalachian National Scenic Trail (APPA), data must be re-aggregated to the APPA area of interest.
+
+This document describes how to use the `rFIA` R package ([Stanke et al. 2020](https://doi.org/10.1016/j.envsoft.2020.104664)) to download USFS FIA data and estimate forest attributes described in the APPA Forest Health Protocol ([Dieffenbach 2018](https://irma.nps.gov/DataStore/Reference/Profile/2257434)). The FIA program conducts annual (panel) inventories within each state. For the APPA region, this is most often a series of 5 annual, spatially unbiased inventories within each sampling cycle. This panel structure allows the FIA program to improve the precision of status and change estimates by leveraging previously collected data within an inventory cycle (e.g., estimate for 2015 may include data from annual inventories conducted from 2010-2015).
+
+This document illustrates how to use the functions in `rFIA` to:
+
+1.  Access FIA data
+
+2.  Subset the FIA data frame to the APPA HUC10 Shell
+
+3.  Produce the following estimates, typically at the plot- and ecoregion-scale:
+
+    -   **Live tree abundance**
+        -   TPA, BAA, biomass, and carbon by species
+    -   **Species diversity of live trees**
+        -   Shannon's diversity, evenness, and richness
+    -   **Tree vital rates**
+        -   Annual diameter, basal area, and biomass growth by species
+    -   **Forest demographic rates**
+        -   Annual recruitment and mortality rates by species
+    -   **Regeneration abundance**
+        -   TPA of seedlings and saplings by species and size-class
+    -   **Snag abundance**
+        -   TPA, BAA, biomass, carbon, relative fraction
+    -   **Down woody debris abundance**
+        -   Volume, biomass, and carbon by fuel class
+    -   **Invasive Plant abundance**
+        -   \% cover by species
+    -   **Stand structural stage distributions**
+        -   \% area in pole, mature, and late stage forest
+
+This document does not describe the [FIA database structure](https://apps.fs.usda.gov/fia/datamart/datamart.html) or demonstrate all of the functionality of the `rFIA` package functions. Readers should consult the documentation within the `rFIA` package for specific function details. Some additional rFIA references include:
+
+-   rFIA github page <https://github.com/hunter-stanke/rFIA>
+
+-   rFIA package documentation on CRAN: <https://rdrr.io/cran/rFIA/>
+
+-   rFIA tutorials page: <https://rfia.netlify.app/>
+
+## SOP Usage
+
+This SOP was written in *R* using `Rmarkdown` and the associated `bookdown` package. Each "Chapter" of this SOP (e.g. 1-Background, 2-Download, 3-Clip, etc.) is a separate `.Rmd` file that can be opened and executed to create the actual files and tables described within a chapter. The most recent, working copies of `.Rmd` files can be found within the ([APPAForest github repo](https://github.com/aaronweed/APPAForest)) <!--# update link to match git hub repo where these files will ultimately reside -->. Because the SOP and the executable code are one and the same, when the R code within the .Rmd is updated, so is the SOP. Furthermore, when the supporting text describing the procedures are updated via the SOP text, the intent of the code should remain clear to the code editor. There are other advantages to the SOP and R code originated from the same source. Namely, this approach saves time (one location to update), reduces the chance of errors, and helps avoid the tendency of an SOP to become asynchronous and out of date with intended procedures.
+
+### Annotations
+
+Several annotations are used throughout the SOP. Examples follow:
+
+::: {.alert .alert-danger}
+These messages highlight broken code that requires a fix.
+:::
+
+::: {.alert .alert-warning}
+These messages highlight a choice made that may need further examination. 
+:::
+
+Blue code chunks like this highlight user input options to change functionality:
+```{r example-user-input, class.source=".user-input"}
+# User input needed in these code chunks
+example_variable <- TRUE
+```
+
+
+### Run vs. Render
+
+To produce the desired APPA .csv files needed for the forest health report, you must *Run* the individual .Rmd files (see "[Run .Rmd files](#run)" section). However, to create the SOP document, you will need to *Render* all the .Rmd files together into one document (see "[Render SOP](#render)" section).
+
+### Run .Rmd files {#run}
+
+The .Rmd files presented here need to be run in sequential order to produce the APPA FIA data files. Each .Rmd file (except for index.Rmd) has externally saved output (see table \@ref(tab:rmd-output)) with the subsequent file utilizing the output from the previous file. The reason the .Rmd is split into different files (instead of one file) is because `01-download.Rmd` and `02-clip.Rmd` are time intensive (i.e. computer processor intensive) steps and the user will not want to run these steps more than once. The last .Rmd file, `03-make.Rmd`, selects the appropriate dataset details for use in the APPA report and will likely need periodic updates/edits. Separating `03-make.Rmd` from the first two steps allows the dataset details to be adjusted without having to redo the initial, time-intensive download and clip steps.
+
+**index.Rmd -** This chapter, **1 Background**, is (and must be) named `index.Rmd` and contains important header information (not displayed in the final rendered SOP document) which tells R the desired parameters for how the document should be rendered (see "[Render SOP](#render)" section). All other `.Rmd` files are named according to their corresponding chapter names in this SOP. Note that `index.html` will be the homepage if the SOP document is rendered as a HTML file.
+
+To generate the APPA FIA data files, open a .Rmd file (starting with `01-download.Rmd`) and select `Run All` button from Rstudio or press `Ctrl + Alt + R`.
+
+| .Rmd         | Output                                                                          |
+|---------------|---------------------------------------------------------|
+| index.Rmd    | None                                                                            |
+| download.Rmd | .csv files of FIA data for all APPA states (multiple FIA files per state)       |
+| clip.Rmd     | one .csv file of all FIA plot data within APPA region                           |
+| make.Rmd     | .csv files containing data for each FIA forest measurement type in APPA region. |
+
+: (#tab:rmd-output) The .Rmd files and the corresponding file dataset output.
+
+### Render SOP {#render}
+
+If edits have been made to one or more of the .Rmd files, the SOP can be rendered as a new document (.pdf, .html, word doc).
+
+You can render the HTML version of this SOP in R by installing the \`bookdown\` package, opening the bookdown project file (located within the github repo. For example APPA_SOP.proj), then:
+
+1.  Find the **Build** pane in the RStudio IDE, and
+
+2.  Click on **Build Book**, then select your output format, or select "All formats" if you'd like to use multiple formats from the same book source files.
+
+Or build the book from the R console:
+
+```{r, eval=FALSE}
+bookdown::render_book()
+```
+
+To render to a PDF as a `bookdown::pdf_book`, you'll need to install XeLaTeX. You are recommended to install TinyTeX (which includes XeLaTeX): <https://yihui.org/tinytex/>.
+
+**Run and Render? -** Note that when rendering the document the R code itself will not run because `eval = FALSE` in the code chunk at the beginning of the index.Rmd file.
+
+```{r chunk-demo, eval=FALSE}
+knitr::opts_chunk$set(
+  eval = FALSE
+)
+```
+
+If `eval = TRUE` all R code would run in addition to rendering the SOP document. This is not recommended as processes in the initial .Rmd files (downloading and clipping) are time-intensive and best run separately (see "[Run .Rmd files](#run)" section).
+
+**Preview SOP -** R studio and bookdown offer different options to preview what the rendered document will look like in real time (updates as you edit) without having to render the entire document. You can start the live preview through the Rstudio interface by selecting the "visual" mode instead of "source" mode. Another option is to start the live preview directly from the R console:
+
+```{r eval=FALSE}
+bookdown::serve_book()
+```
+
+```{r include=FALSE}
+# automatically create a bib database for R packages
+knitr::write_bib(c(
+  .packages(), 'bookdown', 'knitr', 'rmarkdown'
+), 'packages.bib')
+```
