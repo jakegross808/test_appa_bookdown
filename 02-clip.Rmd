@@ -582,7 +582,7 @@ plot_attributes_final_graph |>
 ```
 ## Vizualize plots per year
 
-```{r viz-plots-per-year}
+```{r viz-plots-per-year, eval=TRUE, echo=TRUE}
 # Visualize number of plots per subsection per year
 n_plots_per_year <- tpa_plots |>
   sf::st_drop_geometry() |>
