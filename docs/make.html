@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Chapter 4 Make | Appalachian National Scenic Trail Forest Health Monitoring - Standard Operating Procedures</title>
+  <meta name="description" content="<p>This is the standard operating procedures (SOP) and executable R code for generating US Forest Service - Forest Inventory and Analysis (FIA) datasets for the Appalachian National Scenic Trail Forest Health Monitoring Protocol (APPA).
+The HTML output format for this example is bookdown::gitbook,
+set in the _output.yml file.</p>" />
+  <meta name="generator" content="bookdown 0.37 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Chapter 4 Make | Appalachian National Scenic Trail Forest Health Monitoring - Standard Operating Procedures" />
+  <meta property="og:type" content="book" />
+  
+  <meta property="og:description" content="<p>This is the standard operating procedures (SOP) and executable R code for generating US Forest Service - Forest Inventory and Analysis (FIA) datasets for the Appalachian National Scenic Trail Forest Health Monitoring Protocol (APPA).
+The HTML output format for this example is bookdown::gitbook,
+set in the _output.yml file.</p>" />
+  <meta name="github-repo" content="rstudio/bookdown-demo" />
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Chapter 4 Make | Appalachian National Scenic Trail Forest Health Monitoring - Standard Operating Procedures" />
+  
+  <meta name="twitter:description" content="<p>This is the standard operating procedures (SOP) and executable R code for generating US Forest Service - Forest Inventory and Analysis (FIA) datasets for the Appalachian National Scenic Trail Forest Health Monitoring Protocol (APPA).
+The HTML output format for this example is bookdown::gitbook,
+set in the _output.yml file.</p>" />
+  
+
+<meta name="author" content="Northeast Temperate Network - National Park Service" />
+
+
+<meta name="date" content="2024-04-09" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="clip.html"/>
+<link rel="next" href="references.html"/>
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+<link href="libs/anchor-sections-1.1.0/anchor-sections.css" rel="stylesheet" />
+<link href="libs/anchor-sections-1.1.0/anchor-sections-hash.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.1.0/anchor-sections.js"></script>
+<script src="libs/htmlwidgets-1.6.2/htmlwidgets.js"></script>
+<link href="libs/leaflet-1.3.1/leaflet.css" rel="stylesheet" />
+<script src="libs/leaflet-1.3.1/leaflet.js"></script>
+<link href="libs/leafletfix-1.0.0/leafletfix.css" rel="stylesheet" />
+<script src="libs/proj4-2.6.2/proj4.min.js"></script>
+<script src="libs/Proj4Leaflet-1.0.1/proj4leaflet.js"></script>
+<link href="libs/rstudio_leaflet-1.3.1/rstudio_leaflet.css" rel="stylesheet" />
+<script src="libs/leaflet-binding-2.2.1/leaflet.js"></script>
+
+
+<style type="text/css">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<style type="text/css">
+  
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">APPA SOP</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="1" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i><b>1</b> Background</a>
+<ul>
+<li class="chapter" data-level="1.1" data-path="index.html"><a href="index.html#forest-inventory-and-analysis-program-fia"><i class="fa fa-check"></i><b>1.1</b> Forest Inventory and Analysis Program (FIA)</a></li>
+<li class="chapter" data-level="1.2" data-path="index.html"><a href="index.html#sop-usage"><i class="fa fa-check"></i><b>1.2</b> SOP Usage</a>
+<ul>
+<li class="chapter" data-level="1.2.1" data-path="index.html"><a href="index.html#annotations"><i class="fa fa-check"></i><b>1.2.1</b> Annotations</a></li>
+<li class="chapter" data-level="1.2.2" data-path="index.html"><a href="index.html#run-vs.-render"><i class="fa fa-check"></i><b>1.2.2</b> Run vs. Render</a></li>
+<li class="chapter" data-level="1.2.3" data-path="index.html"><a href="index.html#run"><i class="fa fa-check"></i><b>1.2.3</b> Run .Rmd files</a></li>
+<li class="chapter" data-level="1.2.4" data-path="index.html"><a href="index.html#render"><i class="fa fa-check"></i><b>1.2.4</b> Render SOP</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="2" data-path="download.html"><a href="download.html"><i class="fa fa-check"></i><b>2</b> Download FIA</a>
+<ul>
+<li class="chapter" data-level="2.1" data-path="download.html"><a href="download.html#install-rfia-package"><i class="fa fa-check"></i><b>2.1</b> Install rFIA package</a>
+<ul>
+<li class="chapter" data-level="2.1.1" data-path="download.html"><a href="download.html#option-1-install-rfia-from-offical-repo-then-manually-fix-package"><i class="fa fa-check"></i><b>2.1.1</b> Option 1: Install rFIA from offical repo, then manually fix package:</a></li>
+<li class="chapter" data-level="2.1.2" data-path="download.html"><a href="download.html#option-2-install-rfia-from-alternative-repo"><i class="fa fa-check"></i><b>2.1.2</b> Option 2: Install rFIA from alternative repo:</a></li>
+</ul></li>
+<li class="chapter" data-level="2.2" data-path="download.html"><a href="download.html#setup-parallel-processing"><i class="fa fa-check"></i><b>2.2</b> Setup parallel processing</a></li>
+<li class="chapter" data-level="2.3" data-path="download.html"><a href="download.html#download-fia-data-for-each-state-intersecting-appa"><i class="fa fa-check"></i><b>2.3</b> Download FIA data for each state intersecting APPA</a>
+<ul>
+<li class="chapter" data-level="2.3.1" data-path="download.html"><a href="download.html#test-run"><i class="fa fa-check"></i><b>2.3.1</b> Test Run</a></li>
+<li class="chapter" data-level="2.3.2" data-path="download.html"><a href="download.html#save-location"><i class="fa fa-check"></i><b>2.3.2</b> Save location</a></li>
+<li class="chapter" data-level="2.3.3" data-path="download.html"><a href="download.html#download-all-fia-data-from-all-13-appa-states"><i class="fa fa-check"></i><b>2.3.3</b> Download all FIA data from all 13 APPA states:</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="clip.html"><a href="clip.html"><i class="fa fa-check"></i><b>3</b> Clip by Ecoregion</a>
+<ul>
+<li class="chapter" data-level="3.1" data-path="clip.html"><a href="clip.html#location-to-save-output"><i class="fa fa-check"></i><b>3.1</b> Location to save output</a></li>
+<li class="chapter" data-level="3.2" data-path="clip.html"><a href="clip.html#load-ecoregions-spatial-data"><i class="fa fa-check"></i><b>3.2</b> Load ‘Ecoregions’ spatial data</a>
+<ul>
+<li class="chapter" data-level="3.2.1" data-path="clip.html"><a href="clip.html#explore-ecoregion-levels"><i class="fa fa-check"></i><b>3.2.1</b> Explore ecoregion levels:</a></li>
+</ul></li>
+<li class="chapter" data-level="3.3" data-path="clip.html"><a href="clip.html#read-fia-data-into-r"><i class="fa fa-check"></i><b>3.3</b> Read FIA data into R</a></li>
+<li class="chapter" data-level="3.4" data-path="clip.html"><a href="clip.html#clip-fia-plots-by-ecoregion"><i class="fa fa-check"></i><b>3.4</b> Clip FIA plots by Ecoregion</a>
+<ul>
+<li class="chapter" data-level="3.4.1" data-path="clip.html"><a href="clip.html#ecosubsections"><i class="fa fa-check"></i><b>3.4.1</b> Ecosubsections</a></li>
+</ul></li>
+<li class="chapter" data-level="3.5" data-path="clip.html"><a href="clip.html#supporting-tables"><i class="fa fa-check"></i><b>3.5</b> Supporting tables</a>
+<ul>
+<li class="chapter" data-level="3.5.1" data-path="clip.html"><a href="clip.html#appalachian-trail-spatial-centerline-data"><i class="fa fa-check"></i><b>3.5.1</b> Appalachian trail spatial centerline data</a></li>
+<li class="chapter" data-level="3.5.2" data-path="clip.html"><a href="clip.html#appa-fia-plots"><i class="fa fa-check"></i><b>3.5.2</b> APPA FIA plots</a></li>
+<li class="chapter" data-level="3.5.3" data-path="clip.html"><a href="clip.html#subsections"><i class="fa fa-check"></i><b>3.5.3</b> Subsections</a></li>
+<li class="chapter" data-level="3.5.4" data-path="clip.html"><a href="clip.html#save-subsection-attributes"><i class="fa fa-check"></i><b>3.5.4</b> Save subsection attributes</a></li>
+<li class="chapter" data-level="3.5.5" data-path="clip.html"><a href="clip.html#save-centroids"><i class="fa fa-check"></i><b>3.5.5</b> Save centroids</a></li>
+<li class="chapter" data-level="3.5.6" data-path="clip.html"><a href="clip.html#save-plot-attributes"><i class="fa fa-check"></i><b>3.5.6</b> Save plot attributes</a></li>
+</ul></li>
+<li class="chapter" data-level="3.6" data-path="clip.html"><a href="clip.html#check-plot-attributes-final"><i class="fa fa-check"></i><b>3.6</b> Check plot attributes final</a></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="make.html"><a href="make.html"><i class="fa fa-check"></i><b>4</b> Make</a>
+<ul>
+<li class="chapter" data-level="4.1" data-path="make.html"><a href="make.html#load-data"><i class="fa fa-check"></i><b>4.1</b> Load data</a></li>
+<li class="chapter" data-level="4.2" data-path="make.html"><a href="make.html#save-location-1"><i class="fa fa-check"></i><b>4.2</b> Save location</a></li>
+<li class="chapter" data-level="4.3" data-path="make.html"><a href="make.html#metrics"><i class="fa fa-check"></i><b>4.3</b> Metrics</a>
+<ul>
+<li class="chapter" data-level="4.3.1" data-path="make.html"><a href="make.html#argument-variables"><i class="fa fa-check"></i><b>4.3.1</b> Argument Variables</a></li>
+<li class="chapter" data-level="4.3.2" data-path="make.html"><a href="make.html#population-estimate-method"><i class="fa fa-check"></i><b>4.3.2</b> Population estimate method</a></li>
+</ul></li>
+<li class="chapter" data-level="4.4" data-path="make.html"><a href="make.html#live-tree-abundance"><i class="fa fa-check"></i><b>4.4</b> Live tree abundance</a>
+<ul>
+<li class="chapter" data-level="4.4.1" data-path="make.html"><a href="make.html#tpa"><i class="fa fa-check"></i><b>4.4.1</b> tpa</a></li>
+<li class="chapter" data-level="4.4.2" data-path="make.html"><a href="make.html#tpa_spp"><i class="fa fa-check"></i><b>4.4.2</b> tpa_spp</a></li>
+<li class="chapter" data-level="4.4.3" data-path="make.html"><a href="make.html#tpa_spp_sizecl"><i class="fa fa-check"></i><b>4.4.3</b> tpa_spp_sizecl</a></li>
+<li class="chapter" data-level="4.4.4" data-path="make.html"><a href="make.html#biomass"><i class="fa fa-check"></i><b>4.4.4</b> biomass</a></li>
+</ul></li>
+<li class="chapter" data-level="4.5" data-path="make.html"><a href="make.html#species-diversity-of-live-trees"><i class="fa fa-check"></i><b>4.5</b> Species diversity of live trees</a>
+<ul>
+<li class="chapter" data-level="4.5.1" data-path="make.html"><a href="make.html#diversity"><i class="fa fa-check"></i><b>4.5.1</b> diversity</a></li>
+</ul></li>
+<li class="chapter" data-level="4.6" data-path="make.html"><a href="make.html#tree-growth-rates"><i class="fa fa-check"></i><b>4.6</b> Tree growth rates</a>
+<ul>
+<li class="chapter" data-level="4.6.1" data-path="make.html"><a href="make.html#growth"><i class="fa fa-check"></i><b>4.6.1</b> growth</a></li>
+</ul></li>
+<li class="chapter" data-level="4.7" data-path="make.html"><a href="make.html#forest-demographic-rates"><i class="fa fa-check"></i><b>4.7</b> Forest demographic rates</a>
+<ul>
+<li class="chapter" data-level="4.7.1" data-path="make.html"><a href="make.html#mortality"><i class="fa fa-check"></i><b>4.7.1</b> mortality</a></li>
+</ul></li>
+<li class="chapter" data-level="4.8" data-path="make.html"><a href="make.html#regeneration-abundance"><i class="fa fa-check"></i><b>4.8</b> Regeneration abundance</a>
+<ul>
+<li class="chapter" data-level="4.8.1" data-path="make.html"><a href="make.html#seedlings"><i class="fa fa-check"></i><b>4.8.1</b> seedlings</a></li>
+<li class="chapter" data-level="4.8.2" data-path="make.html"><a href="make.html#seedlings_spp"><i class="fa fa-check"></i><b>4.8.2</b> seedlings_spp</a></li>
+<li class="chapter" data-level="4.8.3" data-path="make.html"><a href="make.html#saplings"><i class="fa fa-check"></i><b>4.8.3</b> saplings</a></li>
+<li class="chapter" data-level="4.8.4" data-path="make.html"><a href="make.html#saplings_spp"><i class="fa fa-check"></i><b>4.8.4</b> saplings_spp</a></li>
+<li class="chapter" data-level="4.8.5" data-path="make.html"><a href="make.html#saplings_sizecl"><i class="fa fa-check"></i><b>4.8.5</b> saplings_sizecl</a></li>
+</ul></li>
+<li class="chapter" data-level="4.9" data-path="make.html"><a href="make.html#snags"><i class="fa fa-check"></i><b>4.9</b> Snags</a>
+<ul>
+<li class="chapter" data-level="4.9.1" data-path="make.html"><a href="make.html#snag_abundance"><i class="fa fa-check"></i><b>4.9.1</b> snag_abundance</a></li>
+<li class="chapter" data-level="4.9.2" data-path="make.html"><a href="make.html#dead_and_live_tpa"><i class="fa fa-check"></i><b>4.9.2</b> dead_and_live_tpa</a></li>
+<li class="chapter" data-level="4.9.3" data-path="make.html"><a href="make.html#snag_volume"><i class="fa fa-check"></i><b>4.9.3</b> snag_volume</a></li>
+</ul></li>
+<li class="chapter" data-level="4.10" data-path="make.html"><a href="make.html#down-woody-material"><i class="fa fa-check"></i><b>4.10</b> Down woody material</a>
+<ul>
+<li class="chapter" data-level="4.10.1" data-path="make.html"><a href="make.html#downwoody"><i class="fa fa-check"></i><b>4.10.1</b> downwoody</a></li>
+</ul></li>
+<li class="chapter" data-level="4.11" data-path="make.html"><a href="make.html#invasive-plant-abundance"><i class="fa fa-check"></i><b>4.11</b> Invasive plant abundance</a>
+<ul>
+<li class="chapter" data-level="4.11.1" data-path="make.html"><a href="make.html#invasive"><i class="fa fa-check"></i><b>4.11.1</b> invasive</a></li>
+</ul></li>
+<li class="chapter" data-level="4.12" data-path="make.html"><a href="make.html#stand-structural-stage-distributions"><i class="fa fa-check"></i><b>4.12</b> Stand structural stage distributions</a>
+<ul>
+<li class="chapter" data-level="4.12.1" data-path="make.html"><a href="make.html#ss"><i class="fa fa-check"></i><b>4.12.1</b> ss</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i><b>5</b> References</a></li>
+<li class="chapter" data-level="6" data-path="revision-history.html"><a href="revision-history.html"><i class="fa fa-check"></i><b>6</b> Revision History</a></li>
+<li class="divider"></li>
+<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Appalachian National Scenic Trail Forest Health Monitoring - Standard Operating Procedures</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="make" class="section level1 hasAnchor" number="4">
+<h1><span class="header-section-number">Chapter 4</span> Make<a href="make.html#make" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<div id="load-data" class="section level2 hasAnchor" number="4.1">
+<h2><span class="header-section-number">4.1</span> Load data<a href="make.html#load-data" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Location where data was saved from previous chapter (clip)</p>
+<div class="sourceCode" id="cb77"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb77-1"><a href="make.html#cb77-1" tabindex="-1"></a><span class="do">## default location:</span></span>
+<span id="cb77-2"><a href="make.html#cb77-2" tabindex="-1"></a>load_location_default <span class="ot">&lt;-</span> <span class="st">&#39;./clip_FIA/&#39;</span></span>
+<span id="cb77-3"><a href="make.html#cb77-3" tabindex="-1"></a><span class="do">## custom location:</span></span>
+<span id="cb77-4"><a href="make.html#cb77-4" tabindex="-1"></a>load_location_custom <span class="ot">&lt;-</span> <span class="st">&#39;C:/Users/JJGross/Documents/R_projects/FIA_data/clip_FIA/&#39;</span> </span>
+<span id="cb77-5"><a href="make.html#cb77-5" tabindex="-1"></a><span class="co">#set variable</span></span>
+<span id="cb77-6"><a href="make.html#cb77-6" tabindex="-1"></a>load_location <span class="ot">&lt;-</span> load_location_custom</span></code></pre></div>
+<p>Load data and set as default argument variables</p>
+<div class="sourceCode" id="cb78"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb78-1"><a href="make.html#cb78-1" tabindex="-1"></a><span class="do">## Load most recent (MR) Appalachian trail (at) dataset:</span></span>
+<span id="cb78-2"><a href="make.html#cb78-2" tabindex="-1"></a>at_MR <span class="ot">&lt;-</span> <span class="fu">read_rds</span>(<span class="at">file =</span> <span class="fu">paste0</span>(load_location, <span class="st">&quot;at_FIA_MR.rds&quot;</span>))</span>
+<span id="cb78-3"><a href="make.html#cb78-3" tabindex="-1"></a><span class="do">## Load entire Appalachian trail (at) dataset:</span></span>
+<span id="cb78-4"><a href="make.html#cb78-4" tabindex="-1"></a>at <span class="ot">&lt;-</span> <span class="fu">read_rds</span>(<span class="at">file =</span> <span class="fu">paste0</span>(load_location, <span class="st">&quot;at_FIA.rds&quot;</span>)) </span>
+<span id="cb78-5"><a href="make.html#cb78-5" tabindex="-1"></a><span class="do">## Load eco</span></span>
+<span id="cb78-6"><a href="make.html#cb78-6" tabindex="-1"></a>eco <span class="ot">&lt;-</span> <span class="fu">read_rds</span>(<span class="at">file =</span> <span class="fu">paste0</span>(load_location, <span class="st">&quot;eco.rds&quot;</span>)) </span>
+<span id="cb78-7"><a href="make.html#cb78-7" tabindex="-1"></a></span>
+<span id="cb78-8"><a href="make.html#cb78-8" tabindex="-1"></a><span class="do">## Set default variables for rFIA function:</span></span>
+<span id="cb78-9"><a href="make.html#cb78-9" tabindex="-1"></a>database_variable <span class="ot">&lt;-</span> at</span>
+<span id="cb78-10"><a href="make.html#cb78-10" tabindex="-1"></a>polys_variable <span class="ot">&lt;-</span> eco</span></code></pre></div>
+</div>
+<div id="save-location-1" class="section level2 hasAnchor" number="4.2">
+<h2><span class="header-section-number">4.2</span> Save location<a href="make.html#save-location-1" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Choose where final tables will be saved:</p>
+<div class="sourceCode" id="cb79"><pre class="sourceCode r user-input"><code class="sourceCode r"><span id="cb79-1"><a href="make.html#cb79-1" tabindex="-1"></a><span class="do">## default location:</span></span>
+<span id="cb79-2"><a href="make.html#cb79-2" tabindex="-1"></a>save_default <span class="ot">&lt;-</span> <span class="st">&#39;./summary_data/&#39;</span> </span>
+<span id="cb79-3"><a href="make.html#cb79-3" tabindex="-1"></a><span class="do">## Alternatively, enter specific custom location:</span></span>
+<span id="cb79-4"><a href="make.html#cb79-4" tabindex="-1"></a>save_custom <span class="ot">&lt;-</span> <span class="st">&#39;C:/Users/JJGross/Documents/R_projects/FIA_data/summary_data/&#39;</span></span>
+<span id="cb79-5"><a href="make.html#cb79-5" tabindex="-1"></a></span>
+<span id="cb79-6"><a href="make.html#cb79-6" tabindex="-1"></a>save_location <span class="ot">&lt;-</span> save_custom</span>
+<span id="cb79-7"><a href="make.html#cb79-7" tabindex="-1"></a></span>
+<span id="cb79-8"><a href="make.html#cb79-8" tabindex="-1"></a><span class="do">## Create directory if it doesn&#39;t already exist</span></span>
+<span id="cb79-9"><a href="make.html#cb79-9" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">dir.exists</span>(save_location)) {<span class="fu">dir.create</span>(save_location)}</span></code></pre></div>
+</div>
+<div id="metrics" class="section level2 hasAnchor" number="4.3">
+<h2><span class="header-section-number">4.3</span> Metrics<a href="make.html#metrics" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Derive population estimates (at the plot- or the ecoregion-scale) for each forest health metric:</p>
+<p><strong>Live tree abundance</strong></p>
+<ul>
+<li><a href="make.html#tpa">tpa</a></li>
+<li><a href="make.html#tpa_spp">tpa_spp</a></li>
+<li><a href="make.html#tpa_spp_sizecl">tpa_spp_sizecl</a></li>
+<li><a href="make.html#biomass">biomass</a></li>
+</ul>
+<p><strong>Species diversity of live trees</strong></p>
+<ul>
+<li><a href="make.html#diversity">diversity</a></li>
+</ul>
+<p><strong>Tree vital rates</strong></p>
+<ul>
+<li><a href="make.html#growth">growth</a></li>
+</ul>
+<p><strong>Forest demographic rates</strong></p>
+<ul>
+<li><a href="make.html#mortality">mortality</a></li>
+</ul>
+<p><strong>Regeneration abundance</strong></p>
+<ul>
+<li><a href="make.html#seedlings">seedlings</a></li>
+<li><a href="make.html#seedlings_spp">seedlings_spp</a></li>
+<li><a href="make.html#saplings">saplings</a></li>
+<li><a href="make.html#saplings_spp">saplings_spp</a></li>
+<li><a href="make.html#saplings_sizecl">saplings_sizecl</a></li>
+</ul>
+<p><strong>Snags</strong></p>
+<ul>
+<li><a href="make.html#snag_abundance">snag_abundance</a></li>
+<li><a href="make.html#dead_and_live_tpa">dead_and_live_tpa</a></li>
+<li><a href="make.html#snag_volume">snag_volume</a></li>
+</ul>
+<p><strong>Down woody material</strong></p>
+<ul>
+<li><a href="make.html#downwoody">downwoody</a></li>
+</ul>
+<p><strong>Invasive plant abundance</strong></p>
+<ul>
+<li><a href="make.html#invasive">invasive</a></li>
+</ul>
+<p><strong>Stand structural stage distributions</strong></p>
+<ul>
+<li><a href="make.html#ss">ss</a></li>
+</ul>
+<p>Each of the following subsections illustrates how to use the variety of functions in <code>rFIA</code> to calculate these metrics.</p>
+<div id="argument-variables" class="section level3 hasAnchor" number="4.3.1">
+<h3><span class="header-section-number">4.3.1</span> Argument Variables<a href="make.html#argument-variables" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Are plot-level records desired within each <code>SUBSECTION</code>? If so, run the entire <code>03-make.Rmd</code> with <code>by_plot_variable</code> set to <code>TRUE</code>. Otherwise, leave <code>by_plot_variable &lt;- FALSE</code> to aggregate FIA plots at <code>SUBSECTION</code> level.</p>
+<ul>
+<li><code>by_plot_variable &lt;- FALSE</code> means tables are summarized at SUBSECTION-level</li>
+<li><code>by_plot_variable &lt;- TRUE</code> means tables are summarized at the FIA plot-level</li>
+</ul>
+<div class="sourceCode" id="cb80"><pre class="sourceCode r user-input"><code class="sourceCode r"><span id="cb80-1"><a href="make.html#cb80-1" tabindex="-1"></a>by_plot_variable <span class="ot">&lt;-</span> <span class="cn">FALSE</span></span></code></pre></div>
+<ul>
+<li><code>most_recent &lt;- FALSE</code> means all FIA plots are included in the data tables</li>
+<li><code>most_recent &lt;- TRUE</code> means only the most recent FIA plots are included</li>
+</ul>
+<div class="sourceCode" id="cb81"><pre class="sourceCode r user-input"><code class="sourceCode r"><span id="cb81-1"><a href="make.html#cb81-1" tabindex="-1"></a>most_recent <span class="ot">&lt;-</span> <span class="cn">TRUE</span></span></code></pre></div>
+<p>The code chunk below automatically updates argument variables and folder save location based on above user input (blue boxes) to <code>by_plot_variable</code> and <code>most_recent</code>. Code chunk also specifies the number of processing cores to use during the execution of rFIA functions. See the rFIA webpage <a href="https://rfia.netlify.app/tutorial/bigdata/">Tips for working with Big Data</a> for more information.</p>
+<div class="sourceCode" id="cb82"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb82-1"><a href="make.html#cb82-1" tabindex="-1"></a><span class="do">## save tables to new folder if by_plot_variable is TRUE</span></span>
+<span id="cb82-2"><a href="make.html#cb82-2" tabindex="-1"></a><span class="cf">if</span> (by_plot_variable <span class="sc">==</span> <span class="cn">TRUE</span>) {</span>
+<span id="cb82-3"><a href="make.html#cb82-3" tabindex="-1"></a>  <span class="co"># new save location folder</span></span>
+<span id="cb82-4"><a href="make.html#cb82-4" tabindex="-1"></a>  <span class="fu">ifelse</span>(<span class="sc">!</span><span class="fu">dir.exists</span>(<span class="fu">file.path</span>(save_location)), <span class="fu">dir.create</span>(<span class="fu">file.path</span>(save_location)), <span class="cn">FALSE</span>)</span>
+<span id="cb82-5"><a href="make.html#cb82-5" tabindex="-1"></a>  save_location <span class="ot">&lt;-</span> <span class="fu">paste0</span>(save_location, <span class="st">&quot;by_plot_variable/&quot;</span>)</span>
+<span id="cb82-6"><a href="make.html#cb82-6" tabindex="-1"></a>  </span>
+<span id="cb82-7"><a href="make.html#cb82-7" tabindex="-1"></a>}</span>
+<span id="cb82-8"><a href="make.html#cb82-8" tabindex="-1"></a></span>
+<span id="cb82-9"><a href="make.html#cb82-9" tabindex="-1"></a><span class="do">## if &#39;most_recent == TRUE&#39;, than change database_variable to &#39;at_MR&#39; database </span></span>
+<span id="cb82-10"><a href="make.html#cb82-10" tabindex="-1"></a><span class="do">## and create new folder to save MR tables to. </span></span>
+<span id="cb82-11"><a href="make.html#cb82-11" tabindex="-1"></a><span class="cf">if</span> (most_recent <span class="sc">==</span> <span class="cn">TRUE</span>) {</span>
+<span id="cb82-12"><a href="make.html#cb82-12" tabindex="-1"></a>  database_variable <span class="ot">&lt;-</span> at_MR</span>
+<span id="cb82-13"><a href="make.html#cb82-13" tabindex="-1"></a>  <span class="co"># new save location folder</span></span>
+<span id="cb82-14"><a href="make.html#cb82-14" tabindex="-1"></a>  <span class="fu">ifelse</span>(<span class="sc">!</span><span class="fu">dir.exists</span>(<span class="fu">file.path</span>(save_location, <span class="st">&quot;most_recent&quot;</span>)), </span>
+<span id="cb82-15"><a href="make.html#cb82-15" tabindex="-1"></a>         <span class="fu">dir.create</span>(<span class="fu">file.path</span>(save_location, <span class="st">&quot;most_recent&quot;</span>)), <span class="cn">FALSE</span>)</span>
+<span id="cb82-16"><a href="make.html#cb82-16" tabindex="-1"></a>  save_location <span class="ot">&lt;-</span> <span class="fu">paste0</span>(save_location, <span class="st">&quot;most_recent/&quot;</span>)</span>
+<span id="cb82-17"><a href="make.html#cb82-17" tabindex="-1"></a>}</span>
+<span id="cb82-18"><a href="make.html#cb82-18" tabindex="-1"></a></span>
+<span id="cb82-19"><a href="make.html#cb82-19" tabindex="-1"></a><span class="do">## default number of processing cores to utilize in rFIA function arguments below.</span></span>
+<span id="cb82-20"><a href="make.html#cb82-20" tabindex="-1"></a>cores_variable <span class="ot">&lt;-</span> parallel<span class="sc">::</span><span class="fu">detectCores</span>()<span class="sc">-</span><span class="dv">2</span></span></code></pre></div>
+</div>
+<div id="population-estimate-method" class="section level3 hasAnchor" number="4.3.2">
+<h3><span class="header-section-number">4.3.2</span> Population estimate method<a href="make.html#population-estimate-method" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Functions in <code>rFIA</code> can be used to derive population estimates of forest data using 5 unique estimators (i.e. different methods for panel combination) using the <code>method</code> argument in each function. For the purposes of forest population estimation for APPA, only the <code>method = ANNUAL</code> argument is used (i.e. no panel combination). For more information on panel combinations see the rFIA <a href="https://rfia.netlify.app/tutorial/ae/">Alternative design-based estimators</a> page.</p>
+<div class="sourceCode" id="cb83"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb83-1"><a href="make.html#cb83-1" tabindex="-1"></a><span class="do">## Set method variable for rFIA function arguments here:</span></span>
+<span id="cb83-2"><a href="make.html#cb83-2" tabindex="-1"></a>method_variable <span class="ot">&lt;-</span> <span class="st">&quot;ANNUAL&quot;</span></span></code></pre></div>
+<div class="alert alert-danger">
+<p>Note that when using <code>method = "ANNUAL"</code> all <code>rFIA::</code> functions result with the following error message:</p>
+<p>“Bad stratification, i.e., strata too small to compute variance of annual panels. If you are only interested in totals and/or ratio estimates, disregard this. However, if interested in variance (e.g., for confidence intervals) try using method =”TI”.”</p>
+</div>
+</div>
+</div>
+<div id="live-tree-abundance" class="section level2 hasAnchor" number="4.4">
+<h2><span class="header-section-number">4.4</span> Live tree abundance<a href="make.html#live-tree-abundance" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>The <a href="https://rdrr.io/cran/rFIA/man/tpa.html">rFIA::tpa()</a> function Produces tree per acre (TPA) and basal area per acre (BAA) estimates from FIA data, along with population totals for each variable. Options to group estimates by species, size class, and other variables defined in the FIADB.</p>
+<p>Argument <code>treeDomain = DIA \&gt;= 5</code> results in estimates only utilizing tree diameters above 5 inches DBH.</p>
+<div id="tpa" class="section level3 hasAnchor" number="4.4.1">
+<h3><span class="header-section-number">4.4.1</span> tpa<a href="make.html#tpa" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<div class="sourceCode" id="cb84"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb84-1"><a href="make.html#cb84-1" tabindex="-1"></a><span class="do">## Trees per Acre (species and size classes lumped)</span></span>
+<span id="cb84-2"><a href="make.html#cb84-2" tabindex="-1"></a>tpa <span class="ot">&lt;-</span> rFIA<span class="sc">::</span><span class="fu">tpa</span>(</span>
+<span id="cb84-3"><a href="make.html#cb84-3" tabindex="-1"></a>  <span class="at">db =</span> database_variable,</span>
+<span id="cb84-4"><a href="make.html#cb84-4" tabindex="-1"></a>  <span class="at">byPlot =</span> by_plot_variable,</span>
+<span id="cb84-5"><a href="make.html#cb84-5" tabindex="-1"></a>  <span class="at">polys =</span> polys_variable,</span>
+<span id="cb84-6"><a href="make.html#cb84-6" tabindex="-1"></a>  <span class="at">method =</span> method_variable,</span>
+<span id="cb84-7"><a href="make.html#cb84-7" tabindex="-1"></a>  <span class="at">nCores =</span> cores_variable,</span>
+<span id="cb84-8"><a href="make.html#cb84-8" tabindex="-1"></a>  <span class="at">returnSpatial =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb84-9"><a href="make.html#cb84-9" tabindex="-1"></a>  <span class="at">treeType =</span> <span class="st">&quot;live&quot;</span>,</span>
+<span id="cb84-10"><a href="make.html#cb84-10" tabindex="-1"></a>  <span class="at">totals =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb84-11"><a href="make.html#cb84-11" tabindex="-1"></a>  <span class="at">treeDomain =</span> DIA <span class="sc">&gt;=</span> <span class="dv">5</span></span>
+<span id="cb84-12"><a href="make.html#cb84-12" tabindex="-1"></a>) </span>
+<span id="cb84-13"><a href="make.html#cb84-13" tabindex="-1"></a><span class="fu">saveRDS</span>(tpa, <span class="fu">paste0</span>(save_location, <span class="st">&quot;tpa.rds&quot;</span>))</span></code></pre></div>
+</div>
+<div id="tpa_spp" class="section level3 hasAnchor" number="4.4.2">
+<h3><span class="header-section-number">4.4.2</span> tpa_spp<a href="make.html#tpa_spp" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<div class="sourceCode" id="cb85"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb85-1"><a href="make.html#cb85-1" tabindex="-1"></a><span class="do">## Trees per Acre by species (size-classes lumped)</span></span>
+<span id="cb85-2"><a href="make.html#cb85-2" tabindex="-1"></a>tpa_spp <span class="ot">&lt;-</span> rFIA<span class="sc">::</span><span class="fu">tpa</span>(</span>
+<span id="cb85-3"><a href="make.html#cb85-3" tabindex="-1"></a>  <span class="at">db =</span> database_variable,</span>
+<span id="cb85-4"><a href="make.html#cb85-4" tabindex="-1"></a>  <span class="at">byPlot =</span> by_plot_variable,</span>
+<span id="cb85-5"><a href="make.html#cb85-5" tabindex="-1"></a>  <span class="at">polys =</span> polys_variable,</span>
+<span id="cb85-6"><a href="make.html#cb85-6" tabindex="-1"></a>  <span class="at">method =</span> method_variable,</span>
+<span id="cb85-7"><a href="make.html#cb85-7" tabindex="-1"></a>  <span class="at">nCores =</span> cores_variable,</span>
+<span id="cb85-8"><a href="make.html#cb85-8" tabindex="-1"></a>  <span class="at">returnSpatial =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb85-9"><a href="make.html#cb85-9" tabindex="-1"></a>  <span class="at">treeType =</span> <span class="st">&quot;live&quot;</span>,</span>
+<span id="cb85-10"><a href="make.html#cb85-10" tabindex="-1"></a>  <span class="at">totals =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb85-11"><a href="make.html#cb85-11" tabindex="-1"></a>  <span class="at">treeDomain =</span> DIA <span class="sc">&gt;=</span> <span class="dv">5</span>,</span>
+<span id="cb85-12"><a href="make.html#cb85-12" tabindex="-1"></a>  <span class="at">bySpecies =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb85-13"><a href="make.html#cb85-13" tabindex="-1"></a>  <span class="at">bySizeClass =</span> <span class="cn">FALSE</span></span>
+<span id="cb85-14"><a href="make.html#cb85-14" tabindex="-1"></a>) </span>
+<span id="cb85-15"><a href="make.html#cb85-15" tabindex="-1"></a><span class="fu">saveRDS</span>(tpa_spp, <span class="fu">paste0</span>(save_location, <span class="st">&quot;tpa_spp.rds&quot;</span>))</span></code></pre></div>
+</div>
+<div id="tpa_spp_sizecl" class="section level3 hasAnchor" number="4.4.3">
+<h3><span class="header-section-number">4.4.3</span> tpa_spp_sizecl<a href="make.html#tpa_spp_sizecl" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<div class="sourceCode" id="cb86"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb86-1"><a href="make.html#cb86-1" tabindex="-1"></a><span class="do">## Trees per Acre (by species and size-class)</span></span>
+<span id="cb86-2"><a href="make.html#cb86-2" tabindex="-1"></a>tpa_spp_sizecl <span class="ot">&lt;-</span> rFIA<span class="sc">::</span><span class="fu">tpa</span>(</span>
+<span id="cb86-3"><a href="make.html#cb86-3" tabindex="-1"></a>  <span class="at">db =</span> database_variable,</span>
+<span id="cb86-4"><a href="make.html#cb86-4" tabindex="-1"></a>  <span class="at">byPlot =</span> by_plot_variable,</span>
+<span id="cb86-5"><a href="make.html#cb86-5" tabindex="-1"></a>  <span class="at">polys =</span> polys_variable,</span>
+<span id="cb86-6"><a href="make.html#cb86-6" tabindex="-1"></a>  <span class="at">method =</span> method_variable,</span>
+<span id="cb86-7"><a href="make.html#cb86-7" tabindex="-1"></a>  <span class="at">nCores =</span> cores_variable,</span>
+<span id="cb86-8"><a href="make.html#cb86-8" tabindex="-1"></a>  <span class="at">returnSpatial =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb86-9"><a href="make.html#cb86-9" tabindex="-1"></a>  <span class="at">treeType =</span> <span class="st">&quot;live&quot;</span>,</span>
+<span id="cb86-10"><a href="make.html#cb86-10" tabindex="-1"></a>  <span class="at">totals =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb86-11"><a href="make.html#cb86-11" tabindex="-1"></a>  <span class="at">treeDomain =</span> DIA <span class="sc">&gt;=</span> <span class="dv">5</span>,</span>
+<span id="cb86-12"><a href="make.html#cb86-12" tabindex="-1"></a>  <span class="at">bySpecies =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb86-13"><a href="make.html#cb86-13" tabindex="-1"></a>  <span class="at">bySizeClass =</span> <span class="cn">TRUE</span></span>
+<span id="cb86-14"><a href="make.html#cb86-14" tabindex="-1"></a>)</span>
+<span id="cb86-15"><a href="make.html#cb86-15" tabindex="-1"></a><span class="fu">saveRDS</span>(tpa_spp_sizecl, <span class="fu">paste0</span>(save_location, <span class="st">&quot;tpa_spp_sizecl.rds&quot;</span>))</span></code></pre></div>
+</div>
+<div id="biomass" class="section level3 hasAnchor" number="4.4.4">
+<h3><span class="header-section-number">4.4.4</span> biomass<a href="make.html#biomass" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>The <a href="https://rdrr.io/cran/rFIA/man/biomass.html">rFIA::biomass()</a> function produces estimates of volume (cu.ft./acre), biomass (tons/acre), and carbon (tons/acre) with options to group estimates by species, size class, and other variables defined in the FIADB.</p>
+<div class="sourceCode" id="cb87"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb87-1"><a href="make.html#cb87-1" tabindex="-1"></a><span class="do">## biomass (by species and size-class)</span></span>
+<span id="cb87-2"><a href="make.html#cb87-2" tabindex="-1"></a><span class="co"># biomass &lt;- rFIA::biomass(db = database_variable,</span></span>
+<span id="cb87-3"><a href="make.html#cb87-3" tabindex="-1"></a><span class="co">#            byPlot = by_plot_variable,</span></span>
+<span id="cb87-4"><a href="make.html#cb87-4" tabindex="-1"></a><span class="co">#            polys = polys_variable, </span></span>
+<span id="cb87-5"><a href="make.html#cb87-5" tabindex="-1"></a><span class="co">#            method = method_variable,</span></span>
+<span id="cb87-6"><a href="make.html#cb87-6" tabindex="-1"></a><span class="co">#            nCores = cores_variable,</span></span>
+<span id="cb87-7"><a href="make.html#cb87-7" tabindex="-1"></a><span class="co">#            returnSpatial = TRUE,</span></span>
+<span id="cb87-8"><a href="make.html#cb87-8" tabindex="-1"></a><span class="co">#            treeType = &quot;live&quot;,</span></span>
+<span id="cb87-9"><a href="make.html#cb87-9" tabindex="-1"></a><span class="co">#            totals = TRUE,</span></span>
+<span id="cb87-10"><a href="make.html#cb87-10" tabindex="-1"></a><span class="co">#            treeDomain = DIA &gt;= 5,</span></span>
+<span id="cb87-11"><a href="make.html#cb87-11" tabindex="-1"></a><span class="co">#            bySpecies = TRUE, </span></span>
+<span id="cb87-12"><a href="make.html#cb87-12" tabindex="-1"></a><span class="co">#            bySizeClass = TRUE) </span></span>
+<span id="cb87-13"><a href="make.html#cb87-13" tabindex="-1"></a><span class="co"># saveRDS(biomass, paste0(save_location, &quot;biomass.rds&quot;))</span></span></code></pre></div>
+<div class="alert alert-danger">
+<p>Note that the <code>rFIA::biomass()</code> function currently produces the following error and needs attention from package developers.</p>
+<p>Error in fcase(is.na(DIA), NA_real_, !is.na(DRYBIO_WDLD_SPP), DRYBIO_WDLD_SPP/(jTotal - : object ‘DRYBIO_WDLD_SPP’ not found</p>
+</div>
+</div>
+</div>
+<div id="species-diversity-of-live-trees" class="section level2 hasAnchor" number="4.5">
+<h2><span class="header-section-number">4.5</span> Species diversity of live trees<a href="make.html#species-diversity-of-live-trees" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>The <a href="https://rdrr.io/cran/rFIA/man/diversity.html">rFIA::diversity()</a> function produces estimates of diversity from FIA data. Returns Shannon’s Index (H), Shannon’s Equitability (Eh), and Richness (S) for alpha (mean/SE of stands), beta, and gamma diversity. Default behavior estimates species diversity, using TPA as a state variable and Species Code (SPCD) to groups of individuals.</p>
+<div id="diversity" class="section level3 hasAnchor" number="4.5.1">
+<h3><span class="header-section-number">4.5.1</span> diversity<a href="make.html#diversity" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<div class="sourceCode" id="cb88"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb88-1"><a href="make.html#cb88-1" tabindex="-1"></a><span class="do">## Diversity</span></span>
+<span id="cb88-2"><a href="make.html#cb88-2" tabindex="-1"></a>diversity <span class="ot">&lt;-</span> rFIA<span class="sc">::</span><span class="fu">diversity</span>(</span>
+<span id="cb88-3"><a href="make.html#cb88-3" tabindex="-1"></a>  <span class="at">db =</span> database_variable,</span>
+<span id="cb88-4"><a href="make.html#cb88-4" tabindex="-1"></a>  <span class="at">byPlot =</span> by_plot_variable,</span>
+<span id="cb88-5"><a href="make.html#cb88-5" tabindex="-1"></a>  <span class="at">polys =</span> polys_variable,</span>
+<span id="cb88-6"><a href="make.html#cb88-6" tabindex="-1"></a>  <span class="at">method =</span> method_variable,</span>
+<span id="cb88-7"><a href="make.html#cb88-7" tabindex="-1"></a>  <span class="at">nCores =</span> cores_variable,</span>
+<span id="cb88-8"><a href="make.html#cb88-8" tabindex="-1"></a>  <span class="at">returnSpatial =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb88-9"><a href="make.html#cb88-9" tabindex="-1"></a>  <span class="at">treeType =</span> <span class="st">&quot;live&quot;</span>,</span>
+<span id="cb88-10"><a href="make.html#cb88-10" tabindex="-1"></a>  <span class="at">totals =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb88-11"><a href="make.html#cb88-11" tabindex="-1"></a>  <span class="at">treeDomain =</span> DIA <span class="sc">&gt;=</span> <span class="dv">5</span></span>
+<span id="cb88-12"><a href="make.html#cb88-12" tabindex="-1"></a>)</span>
+<span id="cb88-13"><a href="make.html#cb88-13" tabindex="-1"></a><span class="fu">saveRDS</span>(diversity, <span class="fu">paste0</span>(save_location, <span class="st">&quot;diversity.rds&quot;</span>))</span></code></pre></div>
+</div>
+</div>
+<div id="tree-growth-rates" class="section level2 hasAnchor" number="4.6">
+<h2><span class="header-section-number">4.6</span> Tree growth rates<a href="make.html#tree-growth-rates" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>The <a href="https://rdrr.io/cran/rFIA/man/vitalRates.html">rFIA::vitalRates()</a> function computes estimates of average annual DBH (inches/ yr), basal area (sq. ft./ yr), biomass (short tons/ yr), and net volume (cu. ft./yr) growth rates for individual stems, along with average annual basal area and net volume growth per acre.</p>
+<p>To calcuate by size class include argument <code>bySizeClass =TRUE</code></p>
+<p>To estimate net growth rates (include trees that have recruited or died in estimates), use <code>treeType = 'all'</code> (default)</p>
+<p>To exclude stems that died or recruited into the population between plot measurements set <code>treeType = 'live'</code></p>
+<div id="growth" class="section level3 hasAnchor" number="4.6.1">
+<h3><span class="header-section-number">4.6.1</span> growth<a href="make.html#growth" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<div class="sourceCode" id="cb89"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb89-1"><a href="make.html#cb89-1" tabindex="-1"></a><span class="do">## Tree DBH growth</span></span>
+<span id="cb89-2"><a href="make.html#cb89-2" tabindex="-1"></a>growth <span class="ot">&lt;-</span> rFIA<span class="sc">::</span><span class="fu">vitalRates</span>(</span>
+<span id="cb89-3"><a href="make.html#cb89-3" tabindex="-1"></a>  <span class="at">db =</span> database_variable,</span>
+<span id="cb89-4"><a href="make.html#cb89-4" tabindex="-1"></a>  <span class="at">byPlot =</span> by_plot_variable,</span>
+<span id="cb89-5"><a href="make.html#cb89-5" tabindex="-1"></a>  <span class="at">polys =</span> polys_variable,</span>
+<span id="cb89-6"><a href="make.html#cb89-6" tabindex="-1"></a>  <span class="at">method =</span> method_variable,</span>
+<span id="cb89-7"><a href="make.html#cb89-7" tabindex="-1"></a>  <span class="at">nCores =</span> cores_variable,</span>
+<span id="cb89-8"><a href="make.html#cb89-8" tabindex="-1"></a>  <span class="at">returnSpatial =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb89-9"><a href="make.html#cb89-9" tabindex="-1"></a>  <span class="at">treeType =</span> <span class="st">&quot;live&quot;</span>,</span>
+<span id="cb89-10"><a href="make.html#cb89-10" tabindex="-1"></a>  <span class="at">totals =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb89-11"><a href="make.html#cb89-11" tabindex="-1"></a>  <span class="at">treeDomain =</span> DIA <span class="sc">&gt;=</span> <span class="dv">5</span>,</span>
+<span id="cb89-12"><a href="make.html#cb89-12" tabindex="-1"></a>  <span class="at">bySpecies =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb89-13"><a href="make.html#cb89-13" tabindex="-1"></a>  <span class="at">variance =</span> <span class="cn">TRUE</span> <span class="co"># note error message: &quot;Bad stratification, i.e., strata too small to compute variance of annual panels.&quot; </span></span>
+<span id="cb89-14"><a href="make.html#cb89-14" tabindex="-1"></a>)</span>
+<span id="cb89-15"><a href="make.html#cb89-15" tabindex="-1"></a><span class="fu">saveRDS</span>(growth, <span class="fu">paste0</span>(save_location, <span class="st">&quot;growth.rds&quot;</span>))</span></code></pre></div>
+</div>
+</div>
+<div id="forest-demographic-rates" class="section level2 hasAnchor" number="4.7">
+<h2><span class="header-section-number">4.7</span> Forest demographic rates<a href="make.html#forest-demographic-rates" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>The <a href="https://rdrr.io/cran/rFIA/man/growMort.html">rFIA::growMort()</a> function estimates of annual growth, recruitment, natural mortality, and harvest rates, along with population estimates for each variable.</p>
+<p>Recruitment events are defined as when a live stem which is less than 5 inches DBH at time 1, grows to or beyond 5 inches DBH by time 2. This does NOT include stems which grow beyond the 5-inch diameter criteria and are then subject to mortality prior to remeasurement. Natural mortality is defined as when a live stem is subject to non-harvest mortality between successive measurement periods. Finally, harvest is defined as when a live stem is cut and removed between successive measurements.</p>
+<div id="mortality" class="section level3 hasAnchor" number="4.7.1">
+<h3><span class="header-section-number">4.7.1</span> mortality<a href="make.html#mortality" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>To estimate mortality per species:</p>
+<div class="sourceCode" id="cb90"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb90-1"><a href="make.html#cb90-1" tabindex="-1"></a><span class="do">## mortality</span></span>
+<span id="cb90-2"><a href="make.html#cb90-2" tabindex="-1"></a>mortality <span class="ot">&lt;-</span> rFIA<span class="sc">::</span><span class="fu">growMort</span>(</span>
+<span id="cb90-3"><a href="make.html#cb90-3" tabindex="-1"></a>  <span class="at">db =</span> database_variable,</span>
+<span id="cb90-4"><a href="make.html#cb90-4" tabindex="-1"></a>  <span class="at">byPlot =</span> by_plot_variable,</span>
+<span id="cb90-5"><a href="make.html#cb90-5" tabindex="-1"></a>  <span class="at">polys =</span> polys_variable,</span>
+<span id="cb90-6"><a href="make.html#cb90-6" tabindex="-1"></a>  <span class="at">method =</span> method_variable,</span>
+<span id="cb90-7"><a href="make.html#cb90-7" tabindex="-1"></a>  <span class="at">nCores =</span> cores_variable,</span>
+<span id="cb90-8"><a href="make.html#cb90-8" tabindex="-1"></a>  <span class="at">returnSpatial =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb90-9"><a href="make.html#cb90-9" tabindex="-1"></a>  <span class="at">treeType =</span> <span class="st">&quot;all&quot;</span>, <span class="co">#default, includes all stems, live and dead</span></span>
+<span id="cb90-10"><a href="make.html#cb90-10" tabindex="-1"></a>  <span class="at">totals =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb90-11"><a href="make.html#cb90-11" tabindex="-1"></a>  <span class="at">treeDomain =</span> DIA <span class="sc">&gt;=</span> <span class="dv">5</span>,</span>
+<span id="cb90-12"><a href="make.html#cb90-12" tabindex="-1"></a>  <span class="at">bySpecies =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb90-13"><a href="make.html#cb90-13" tabindex="-1"></a>  <span class="at">variance =</span> <span class="cn">TRUE</span> <span class="co"># note error message: &quot;Bad stratification, i.e., strata too small to compute variance of annual panels.&quot; </span></span>
+<span id="cb90-14"><a href="make.html#cb90-14" tabindex="-1"></a>)</span>
+<span id="cb90-15"><a href="make.html#cb90-15" tabindex="-1"></a><span class="fu">saveRDS</span>(mortality, <span class="fu">paste0</span>(save_location, <span class="st">&quot;mortality.rds&quot;</span>))</span></code></pre></div>
+<div class="alert alert-danger">
+<p>Column <code>mortality$MORT_PERC</code> results in <code>Inf</code> for each row. Suspected error with <code>rFIA::growMort()</code> because none of the tables produced had any values in <code>MORT_PREC</code></p>
+</div>
+</div>
+</div>
+<div id="regeneration-abundance" class="section level2 hasAnchor" number="4.8">
+<h2><span class="header-section-number">4.8</span> Regeneration abundance<a href="make.html#regeneration-abundance" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>The <a href="https://rdrr.io/cran/rFIA/man/seedling.html">rFIA::seedlings()</a> and <a href="https://rdrr.io/cran/rFIA/man/tpa.html">rFIA::tpa()</a> functions are used to estimate regeneration of seedlings and sapling, respectively. Note that querying saplings can be achieved within the <code>rFIA::tpa()</code> function by setting the tree domain argument <code>treeDomain = DIA &lt; 5</code>. Stems below 1 inch DBH are not included in output of <code>rFIA::tpa()</code> because FIA seedlings (&lt;1 inch DBH) are sampled differently and therefore queried using the distinct <code>rFIA::seedlings()</code> function.</p>
+<div id="seedlings" class="section level3 hasAnchor" number="4.8.1">
+<h3><span class="header-section-number">4.8.1</span> seedlings<a href="make.html#seedlings" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Seedling abundance (trees per acre) is computed using the distinct <code>rFIA::seedlings()</code> function, not the <code>rFIA::tpa()</code> function.</p>
+<p>The <a href="https://www.fs.usda.gov/research/understory/forest-inventory-and-analysis-glossary-standard-terminology">FIA glossary</a> defines seedlings as: “Live trees smaller than 1.0 inch (2.5 cm) d.b.h./d.r.c. that are at least 6 inches (15.2 cm) in height for softwoods and 12-inches (30.5 cm) in height for hardwoods.”</p>
+<div class="sourceCode" id="cb91"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb91-1"><a href="make.html#cb91-1" tabindex="-1"></a><span class="do">## Trees per acre of seedlings (&lt;1 inch DBH)</span></span>
+<span id="cb91-2"><a href="make.html#cb91-2" tabindex="-1"></a>seedlings <span class="ot">&lt;-</span> rFIA<span class="sc">::</span><span class="fu">seedling</span>(</span>
+<span id="cb91-3"><a href="make.html#cb91-3" tabindex="-1"></a>  <span class="at">db =</span> database_variable,</span>
+<span id="cb91-4"><a href="make.html#cb91-4" tabindex="-1"></a>  <span class="at">byPlot =</span> by_plot_variable,</span>
+<span id="cb91-5"><a href="make.html#cb91-5" tabindex="-1"></a>  <span class="at">polys =</span> polys_variable,</span>
+<span id="cb91-6"><a href="make.html#cb91-6" tabindex="-1"></a>  <span class="at">method =</span> method_variable,</span>
+<span id="cb91-7"><a href="make.html#cb91-7" tabindex="-1"></a>  <span class="at">nCores =</span> cores_variable,</span>
+<span id="cb91-8"><a href="make.html#cb91-8" tabindex="-1"></a>  <span class="at">returnSpatial =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb91-9"><a href="make.html#cb91-9" tabindex="-1"></a>  <span class="at">totals =</span> <span class="cn">TRUE</span></span>
+<span id="cb91-10"><a href="make.html#cb91-10" tabindex="-1"></a>) </span>
+<span id="cb91-11"><a href="make.html#cb91-11" tabindex="-1"></a><span class="fu">saveRDS</span>(seedlings, <span class="fu">paste0</span>(save_location, <span class="st">&quot;seedlings.rds&quot;</span>))</span></code></pre></div>
+</div>
+<div id="seedlings_spp" class="section level3 hasAnchor" number="4.8.2">
+<h3><span class="header-section-number">4.8.2</span> seedlings_spp<a href="make.html#seedlings_spp" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<div class="sourceCode" id="cb92"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb92-1"><a href="make.html#cb92-1" tabindex="-1"></a><span class="do">## Trees per acre of seedlings by species</span></span>
+<span id="cb92-2"><a href="make.html#cb92-2" tabindex="-1"></a>seedlings_spp <span class="ot">&lt;-</span> rFIA<span class="sc">::</span><span class="fu">seedling</span>(</span>
+<span id="cb92-3"><a href="make.html#cb92-3" tabindex="-1"></a>  <span class="at">db =</span> database_variable,</span>
+<span id="cb92-4"><a href="make.html#cb92-4" tabindex="-1"></a>  <span class="at">byPlot =</span> by_plot_variable,</span>
+<span id="cb92-5"><a href="make.html#cb92-5" tabindex="-1"></a>  <span class="at">polys =</span> polys_variable,</span>
+<span id="cb92-6"><a href="make.html#cb92-6" tabindex="-1"></a>  <span class="at">method =</span> method_variable,</span>
+<span id="cb92-7"><a href="make.html#cb92-7" tabindex="-1"></a>  <span class="at">nCores =</span> cores_variable,</span>
+<span id="cb92-8"><a href="make.html#cb92-8" tabindex="-1"></a>  <span class="at">returnSpatial =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb92-9"><a href="make.html#cb92-9" tabindex="-1"></a>  <span class="at">totals =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb92-10"><a href="make.html#cb92-10" tabindex="-1"></a>  <span class="at">bySpecies =</span> <span class="cn">TRUE</span> <span class="co"># by species</span></span>
+<span id="cb92-11"><a href="make.html#cb92-11" tabindex="-1"></a>) </span>
+<span id="cb92-12"><a href="make.html#cb92-12" tabindex="-1"></a><span class="fu">saveRDS</span>(seedlings_spp, <span class="fu">paste0</span>(save_location, <span class="st">&quot;seedlings_spp.rds&quot;</span>))</span></code></pre></div>
+</div>
+<div id="saplings" class="section level3 hasAnchor" number="4.8.3">
+<h3><span class="header-section-number">4.8.3</span> saplings<a href="make.html#saplings" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Saplings must use <code>rFIA::tpa()</code> function with <code>treeDomain = DIA &lt; 5</code> argument To estimate sapling size class (1 to 4.9 inch DBH).</p>
+<div class="sourceCode" id="cb93"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb93-1"><a href="make.html#cb93-1" tabindex="-1"></a><span class="do">## Trees per acre of saplings (trees greater than 1 inch DBH, and less than 5 inch DBH)</span></span>
+<span id="cb93-2"><a href="make.html#cb93-2" tabindex="-1"></a>saplings <span class="ot">&lt;-</span> rFIA<span class="sc">::</span><span class="fu">tpa</span>(</span>
+<span id="cb93-3"><a href="make.html#cb93-3" tabindex="-1"></a>  <span class="at">db =</span> database_variable,</span>
+<span id="cb93-4"><a href="make.html#cb93-4" tabindex="-1"></a>  <span class="at">byPlot =</span> by_plot_variable,</span>
+<span id="cb93-5"><a href="make.html#cb93-5" tabindex="-1"></a>  <span class="at">polys =</span> polys_variable,</span>
+<span id="cb93-6"><a href="make.html#cb93-6" tabindex="-1"></a>  <span class="at">method =</span> method_variable,</span>
+<span id="cb93-7"><a href="make.html#cb93-7" tabindex="-1"></a>  <span class="at">nCores =</span> cores_variable,</span>
+<span id="cb93-8"><a href="make.html#cb93-8" tabindex="-1"></a>  <span class="at">returnSpatial =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb93-9"><a href="make.html#cb93-9" tabindex="-1"></a>  <span class="at">treeType =</span> <span class="st">&quot;live&quot;</span>,</span>
+<span id="cb93-10"><a href="make.html#cb93-10" tabindex="-1"></a>  <span class="at">totals =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb93-11"><a href="make.html#cb93-11" tabindex="-1"></a>  <span class="at">treeDomain =</span> DIA <span class="sc">&lt;</span> <span class="dv">5</span></span>
+<span id="cb93-12"><a href="make.html#cb93-12" tabindex="-1"></a>) </span>
+<span id="cb93-13"><a href="make.html#cb93-13" tabindex="-1"></a><span class="fu">saveRDS</span>(saplings, <span class="fu">paste0</span>(save_location, <span class="st">&quot;saplings.rds&quot;</span>))</span></code></pre></div>
+</div>
+<div id="saplings_spp" class="section level3 hasAnchor" number="4.8.4">
+<h3><span class="header-section-number">4.8.4</span> saplings_spp<a href="make.html#saplings_spp" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<div class="sourceCode" id="cb94"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb94-1"><a href="make.html#cb94-1" tabindex="-1"></a><span class="do">## Trees per acre of saplings by species </span></span>
+<span id="cb94-2"><a href="make.html#cb94-2" tabindex="-1"></a>saplings_spp <span class="ot">&lt;-</span> rFIA<span class="sc">::</span><span class="fu">tpa</span>(</span>
+<span id="cb94-3"><a href="make.html#cb94-3" tabindex="-1"></a>  <span class="at">db =</span> database_variable,</span>
+<span id="cb94-4"><a href="make.html#cb94-4" tabindex="-1"></a>  <span class="at">byPlot =</span> by_plot_variable,</span>
+<span id="cb94-5"><a href="make.html#cb94-5" tabindex="-1"></a>  <span class="at">polys =</span> polys_variable,</span>
+<span id="cb94-6"><a href="make.html#cb94-6" tabindex="-1"></a>  <span class="at">method =</span> method_variable,</span>
+<span id="cb94-7"><a href="make.html#cb94-7" tabindex="-1"></a>  <span class="at">nCores =</span> cores_variable,</span>
+<span id="cb94-8"><a href="make.html#cb94-8" tabindex="-1"></a>  <span class="at">returnSpatial =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb94-9"><a href="make.html#cb94-9" tabindex="-1"></a>  <span class="at">treeType =</span> <span class="st">&quot;live&quot;</span>,</span>
+<span id="cb94-10"><a href="make.html#cb94-10" tabindex="-1"></a>  <span class="at">totals =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb94-11"><a href="make.html#cb94-11" tabindex="-1"></a>  <span class="at">treeDomain =</span> DIA <span class="sc">&lt;</span> <span class="dv">5</span>,</span>
+<span id="cb94-12"><a href="make.html#cb94-12" tabindex="-1"></a>  <span class="at">bySpecies =</span> <span class="cn">TRUE</span>, <span class="co"># by species</span></span>
+<span id="cb94-13"><a href="make.html#cb94-13" tabindex="-1"></a>  <span class="at">bySizeClass =</span> <span class="cn">FALSE</span></span>
+<span id="cb94-14"><a href="make.html#cb94-14" tabindex="-1"></a>) </span>
+<span id="cb94-15"><a href="make.html#cb94-15" tabindex="-1"></a><span class="fu">saveRDS</span>(saplings_spp, <span class="fu">paste0</span>(save_location, <span class="st">&quot;saplings_spp.rds&quot;</span>))</span></code></pre></div>
+</div>
+<div id="saplings_sizecl" class="section level3 hasAnchor" number="4.8.5">
+<h3><span class="header-section-number">4.8.5</span> saplings_sizecl<a href="make.html#saplings_sizecl" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<div class="sourceCode" id="cb95"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb95-1"><a href="make.html#cb95-1" tabindex="-1"></a><span class="do">## Trees per acre of saplings by size class </span></span>
+<span id="cb95-2"><a href="make.html#cb95-2" tabindex="-1"></a>saplings_sizecl <span class="ot">&lt;-</span> rFIA<span class="sc">::</span><span class="fu">tpa</span>(</span>
+<span id="cb95-3"><a href="make.html#cb95-3" tabindex="-1"></a>  <span class="at">db =</span> database_variable,</span>
+<span id="cb95-4"><a href="make.html#cb95-4" tabindex="-1"></a>  <span class="at">byPlot =</span> by_plot_variable,</span>
+<span id="cb95-5"><a href="make.html#cb95-5" tabindex="-1"></a>  <span class="at">polys =</span> polys_variable,</span>
+<span id="cb95-6"><a href="make.html#cb95-6" tabindex="-1"></a>  <span class="at">method =</span> method_variable,</span>
+<span id="cb95-7"><a href="make.html#cb95-7" tabindex="-1"></a>  <span class="at">nCores =</span> cores_variable,</span>
+<span id="cb95-8"><a href="make.html#cb95-8" tabindex="-1"></a>  <span class="at">returnSpatial =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb95-9"><a href="make.html#cb95-9" tabindex="-1"></a>  <span class="at">treeType =</span> <span class="st">&quot;live&quot;</span>,</span>
+<span id="cb95-10"><a href="make.html#cb95-10" tabindex="-1"></a>  <span class="at">totals =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb95-11"><a href="make.html#cb95-11" tabindex="-1"></a>  <span class="at">treeDomain =</span> DIA <span class="sc">&lt;</span> <span class="dv">5</span>,</span>
+<span id="cb95-12"><a href="make.html#cb95-12" tabindex="-1"></a>  <span class="at">bySpecies =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb95-13"><a href="make.html#cb95-13" tabindex="-1"></a>  <span class="at">bySizeClass =</span> <span class="cn">TRUE</span> <span class="co"># by size class</span></span>
+<span id="cb95-14"><a href="make.html#cb95-14" tabindex="-1"></a>) </span>
+<span id="cb95-15"><a href="make.html#cb95-15" tabindex="-1"></a><span class="fu">saveRDS</span>(saplings_sizecl, <span class="fu">paste0</span>(save_location, <span class="st">&quot;saplings_sizecl.rds&quot;</span>))</span></code></pre></div>
+</div>
+</div>
+<div id="snags" class="section level2 hasAnchor" number="4.9">
+<h2><span class="header-section-number">4.9</span> Snags<a href="make.html#snags" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p><a href="https://rdrr.io/cran/rFIA/man/tpa.html">rFIA::tpa()</a> and <a href="https://rdrr.io/cran/rFIA/man/biomass.html">rFIA::biomass()</a> can be used to estimate snag abundance, volume, and percentage.</p>
+<div id="snag_abundance" class="section level3 hasAnchor" number="4.9.1">
+<h3><span class="header-section-number">4.9.1</span> snag_abundance<a href="make.html#snag_abundance" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p><code>treeType = "dead"</code> <code>bySizeClass = TRUE</code></p>
+<div class="sourceCode" id="cb96"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb96-1"><a href="make.html#cb96-1" tabindex="-1"></a><span class="do">## Snags per acre</span></span>
+<span id="cb96-2"><a href="make.html#cb96-2" tabindex="-1"></a>snag_abundance <span class="ot">&lt;-</span> rFIA<span class="sc">::</span><span class="fu">tpa</span>(</span>
+<span id="cb96-3"><a href="make.html#cb96-3" tabindex="-1"></a>  <span class="at">db =</span> database_variable,</span>
+<span id="cb96-4"><a href="make.html#cb96-4" tabindex="-1"></a>  <span class="at">byPlot =</span> by_plot_variable,</span>
+<span id="cb96-5"><a href="make.html#cb96-5" tabindex="-1"></a>  <span class="at">polys =</span> polys_variable,</span>
+<span id="cb96-6"><a href="make.html#cb96-6" tabindex="-1"></a>  <span class="at">method =</span> method_variable,</span>
+<span id="cb96-7"><a href="make.html#cb96-7" tabindex="-1"></a>  <span class="at">nCores =</span> cores_variable,</span>
+<span id="cb96-8"><a href="make.html#cb96-8" tabindex="-1"></a>  <span class="at">returnSpatial =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb96-9"><a href="make.html#cb96-9" tabindex="-1"></a>  <span class="at">treeType =</span> <span class="st">&quot;dead&quot;</span>,</span>
+<span id="cb96-10"><a href="make.html#cb96-10" tabindex="-1"></a>  <span class="at">totals =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb96-11"><a href="make.html#cb96-11" tabindex="-1"></a>  <span class="at">treeDomain =</span> DIA <span class="sc">&gt;=</span> <span class="dv">5</span>,</span>
+<span id="cb96-12"><a href="make.html#cb96-12" tabindex="-1"></a>  <span class="at">bySizeClass =</span> <span class="cn">TRUE</span></span>
+<span id="cb96-13"><a href="make.html#cb96-13" tabindex="-1"></a>)</span>
+<span id="cb96-14"><a href="make.html#cb96-14" tabindex="-1"></a></span>
+<span id="cb96-15"><a href="make.html#cb96-15" tabindex="-1"></a><span class="fu">saveRDS</span>(snag_abundance, <span class="fu">paste0</span>(save_location, <span class="st">&quot;snag_abundance.rds&quot;</span>))</span></code></pre></div>
+</div>
+<div id="dead_and_live_tpa" class="section level3 hasAnchor" number="4.9.2">
+<h3><span class="header-section-number">4.9.2</span> dead_and_live_tpa<a href="make.html#dead_and_live_tpa" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p><code>treeType = "all"</code> includes both live and dead trees in calculations. Use <code>grpBy = STATUSCD</code> to avoid lumping Live and Dead tree.</p>
+<table>
+<caption>STATUSCD (From The FIA Database User Guide)</caption>
+<colgroup>
+<col width="20%" />
+<col width="79%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>STATUSCD</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0</td>
+<td>No status - Tree is not presently in the sample (remeasurement plots only). Tree was incorrectly tallied at the previous inventory, currently not tallied due to definition or procedural change, or is not tallied because it is located on a nonsampled condition (e.g., hazardous or denied). RECONCILECD = 5-9 required for remeasured annual inventory data but not for periodic inventory data.</td>
+</tr>
+<tr class="even">
+<td>1</td>
+<td>Live tree</td>
+</tr>
+<tr class="odd">
+<td>2</td>
+<td>Dead tree</td>
+</tr>
+<tr class="even">
+<td>3</td>
+<td>Removed - Cut and removed by direct human activity related to harvesting, silviculture or land clearing. This tree is assumed to be utilized.</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode" id="cb97"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb97-1"><a href="make.html#cb97-1" tabindex="-1"></a><span class="do">## dead and live trees - to calculate percent snags</span></span>
+<span id="cb97-2"><a href="make.html#cb97-2" tabindex="-1"></a>dead_and_live_tpa <span class="ot">&lt;-</span> rFIA<span class="sc">::</span><span class="fu">tpa</span>(</span>
+<span id="cb97-3"><a href="make.html#cb97-3" tabindex="-1"></a>  <span class="at">db =</span> database_variable,</span>
+<span id="cb97-4"><a href="make.html#cb97-4" tabindex="-1"></a>  <span class="at">byPlot =</span> by_plot_variable,</span>
+<span id="cb97-5"><a href="make.html#cb97-5" tabindex="-1"></a>  <span class="at">polys =</span> polys_variable,</span>
+<span id="cb97-6"><a href="make.html#cb97-6" tabindex="-1"></a>  <span class="at">method =</span> method_variable,</span>
+<span id="cb97-7"><a href="make.html#cb97-7" tabindex="-1"></a>  <span class="at">nCores =</span> cores_variable,</span>
+<span id="cb97-8"><a href="make.html#cb97-8" tabindex="-1"></a>  <span class="at">returnSpatial =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb97-9"><a href="make.html#cb97-9" tabindex="-1"></a>  <span class="at">treeType =</span> <span class="st">&quot;all&quot;</span>,</span>
+<span id="cb97-10"><a href="make.html#cb97-10" tabindex="-1"></a>  <span class="at">grpBy =</span> STATUSCD,</span>
+<span id="cb97-11"><a href="make.html#cb97-11" tabindex="-1"></a>  <span class="at">totals =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb97-12"><a href="make.html#cb97-12" tabindex="-1"></a>  <span class="at">treeDomain =</span> DIA <span class="sc">&gt;=</span> <span class="dv">5</span>,</span>
+<span id="cb97-13"><a href="make.html#cb97-13" tabindex="-1"></a>  <span class="at">bySizeClass =</span> <span class="cn">TRUE</span></span>
+<span id="cb97-14"><a href="make.html#cb97-14" tabindex="-1"></a>)</span>
+<span id="cb97-15"><a href="make.html#cb97-15" tabindex="-1"></a></span>
+<span id="cb97-16"><a href="make.html#cb97-16" tabindex="-1"></a>dead_and_live_tpa <span class="ot">&lt;-</span> dead_and_live_tpa <span class="sc">|&gt;</span></span>
+<span id="cb97-17"><a href="make.html#cb97-17" tabindex="-1"></a>  <span class="fu">filter</span>(STATUSCD <span class="sc">==</span> <span class="dv">1</span> <span class="sc">|</span> STATUSCD <span class="sc">==</span> <span class="dv">2</span>) <span class="sc">|&gt;</span> <span class="co">#only interested in live and dead </span></span>
+<span id="cb97-18"><a href="make.html#cb97-18" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">tree_status =</span> <span class="fu">case_when</span>(STATUSCD <span class="sc">==</span> <span class="dv">1</span> <span class="sc">~</span> <span class="st">&quot;Live&quot;</span>,</span>
+<span id="cb97-19"><a href="make.html#cb97-19" tabindex="-1"></a>                                 STATUSCD <span class="sc">==</span> <span class="dv">2</span> <span class="sc">~</span> <span class="st">&quot;Dead&quot;</span>,</span>
+<span id="cb97-20"><a href="make.html#cb97-20" tabindex="-1"></a>                                 <span class="co">#anything else will result in NA</span></span>
+<span id="cb97-21"><a href="make.html#cb97-21" tabindex="-1"></a>                                 <span class="cn">TRUE</span> <span class="sc">~</span> <span class="cn">NA</span>)) </span>
+<span id="cb97-22"><a href="make.html#cb97-22" tabindex="-1"></a>  </span>
+<span id="cb97-23"><a href="make.html#cb97-23" tabindex="-1"></a><span class="fu">saveRDS</span>(dead_and_live_tpa, <span class="fu">paste0</span>(save_location, <span class="st">&quot;dead_and_live_tpa.rds&quot;</span>))</span></code></pre></div>
+</div>
+<div id="snag_volume" class="section level3 hasAnchor" number="4.9.3">
+<h3><span class="header-section-number">4.9.3</span> snag_volume<a href="make.html#snag_volume" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<div class="sourceCode" id="cb98"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb98-1"><a href="make.html#cb98-1" tabindex="-1"></a><span class="co"># ## Snag Volume </span></span>
+<span id="cb98-2"><a href="make.html#cb98-2" tabindex="-1"></a><span class="co"># snag_volume &lt;- rFIA::biomass(</span></span>
+<span id="cb98-3"><a href="make.html#cb98-3" tabindex="-1"></a><span class="co">#   db = database_variable,</span></span>
+<span id="cb98-4"><a href="make.html#cb98-4" tabindex="-1"></a><span class="co">#   byPlot = by_plot_variable,</span></span>
+<span id="cb98-5"><a href="make.html#cb98-5" tabindex="-1"></a><span class="co">#   polys = polys_variable,</span></span>
+<span id="cb98-6"><a href="make.html#cb98-6" tabindex="-1"></a><span class="co">#   method = method_variable,</span></span>
+<span id="cb98-7"><a href="make.html#cb98-7" tabindex="-1"></a><span class="co">#   nCores = cores_variable,</span></span>
+<span id="cb98-8"><a href="make.html#cb98-8" tabindex="-1"></a><span class="co">#   returnSpatial = TRUE,</span></span>
+<span id="cb98-9"><a href="make.html#cb98-9" tabindex="-1"></a><span class="co">#   treeType = &quot;dead&quot;,</span></span>
+<span id="cb98-10"><a href="make.html#cb98-10" tabindex="-1"></a><span class="co">#   totals = TRUE,</span></span>
+<span id="cb98-11"><a href="make.html#cb98-11" tabindex="-1"></a><span class="co">#   treeDomain = DIA &gt;= 5 </span></span>
+<span id="cb98-12"><a href="make.html#cb98-12" tabindex="-1"></a><span class="co"># )</span></span>
+<span id="cb98-13"><a href="make.html#cb98-13" tabindex="-1"></a><span class="co"># saveRDS(snag_volume, paste0(save_location, &quot;snag_volume.rds&quot;))</span></span></code></pre></div>
+<div class="alert alert-danger">
+<p>Note that the <code>rFIA::biomass()</code> function currently produces the following error and needs attention from package developers.</p>
+<p>Error in fcase(is.na(DIA), NA_real_, !is.na(DRYBIO_WDLD_SPP), DRYBIO_WDLD_SPP/(jTotal - : object ‘DRYBIO_WDLD_SPP’ not found</p>
+</div>
+</div>
+</div>
+<div id="down-woody-material" class="section level2 hasAnchor" number="4.10">
+<h2><span class="header-section-number">4.10</span> Down woody material<a href="make.html#down-woody-material" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p><a href="https://rdrr.io/cran/rFIA/man/dwm.html">rFIA::dwm()</a> produces estimates of down woody material stocks. Estimates are returned by fuel class (duff, litter, 1HR, 10HR, 100HR, 1000HR, piles) for application in fuels management.</p>
+<p><strong>1HR fuels</strong>: small, fine woody debris <strong>10HR fuels</strong>: medium, fine woody debris <strong>100HR fuels</strong>: large, fine woody debris <strong>1000HR fuels</strong>: coarse woody debris and slash piles <strong>duff</strong>: O horizon; all unidentifiable organic material above mineral soil, beneath litter <strong>litter</strong>: identifiable plant material which is downed and smaller than 10HR fuel class (1HR class includes standing herbaceous material).</p>
+<div id="downwoody" class="section level3 hasAnchor" number="4.10.1">
+<h3><span class="header-section-number">4.10.1</span> downwoody<a href="make.html#downwoody" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<div class="sourceCode" id="cb99"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb99-1"><a href="make.html#cb99-1" tabindex="-1"></a><span class="do">## Down woody material </span></span>
+<span id="cb99-2"><a href="make.html#cb99-2" tabindex="-1"></a>downwoody <span class="ot">&lt;-</span> rFIA<span class="sc">::</span><span class="fu">dwm</span>(</span>
+<span id="cb99-3"><a href="make.html#cb99-3" tabindex="-1"></a>  <span class="at">db =</span> database_variable,</span>
+<span id="cb99-4"><a href="make.html#cb99-4" tabindex="-1"></a>  <span class="at">byPlot =</span> by_plot_variable,</span>
+<span id="cb99-5"><a href="make.html#cb99-5" tabindex="-1"></a>  <span class="at">polys =</span> polys_variable,</span>
+<span id="cb99-6"><a href="make.html#cb99-6" tabindex="-1"></a>  <span class="at">method =</span> method_variable,</span>
+<span id="cb99-7"><a href="make.html#cb99-7" tabindex="-1"></a>  <span class="at">nCores =</span> cores_variable,</span>
+<span id="cb99-8"><a href="make.html#cb99-8" tabindex="-1"></a>  <span class="at">returnSpatial =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb99-9"><a href="make.html#cb99-9" tabindex="-1"></a>  <span class="at">totals =</span> <span class="cn">TRUE</span></span>
+<span id="cb99-10"><a href="make.html#cb99-10" tabindex="-1"></a>)</span>
+<span id="cb99-11"><a href="make.html#cb99-11" tabindex="-1"></a><span class="fu">saveRDS</span>(downwoody, <span class="fu">paste0</span>(save_location, <span class="st">&quot;downwoody.rds&quot;</span>))</span></code></pre></div>
+</div>
+</div>
+<div id="invasive-plant-abundance" class="section level2 hasAnchor" number="4.11">
+<h2><span class="header-section-number">4.11</span> Invasive plant abundance<a href="make.html#invasive-plant-abundance" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>The <a href="https://rdrr.io/cran/rFIA/man/invasive.html">rFIA::invasive()</a> function produces estimates of the areal coverage (%) of invasive species and frequency of plots invasive species were detected in.</p>
+<div id="invasive" class="section level3 hasAnchor" number="4.11.1">
+<h3><span class="header-section-number">4.11.1</span> invasive<a href="make.html#invasive" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<div class="sourceCode" id="cb100"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb100-1"><a href="make.html#cb100-1" tabindex="-1"></a><span class="do">## invasive</span></span>
+<span id="cb100-2"><a href="make.html#cb100-2" tabindex="-1"></a>invasive <span class="ot">&lt;-</span> rFIA<span class="sc">::</span><span class="fu">invasive</span>(</span>
+<span id="cb100-3"><a href="make.html#cb100-3" tabindex="-1"></a>  <span class="at">db =</span> database_variable,</span>
+<span id="cb100-4"><a href="make.html#cb100-4" tabindex="-1"></a>  <span class="at">byPlot =</span> by_plot_variable,</span>
+<span id="cb100-5"><a href="make.html#cb100-5" tabindex="-1"></a>  <span class="at">polys =</span> polys_variable,</span>
+<span id="cb100-6"><a href="make.html#cb100-6" tabindex="-1"></a>  <span class="at">method =</span> method_variable,</span>
+<span id="cb100-7"><a href="make.html#cb100-7" tabindex="-1"></a>  <span class="at">nCores =</span> cores_variable,</span>
+<span id="cb100-8"><a href="make.html#cb100-8" tabindex="-1"></a>  <span class="at">returnSpatial =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb100-9"><a href="make.html#cb100-9" tabindex="-1"></a>  <span class="at">totals =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb100-10"><a href="make.html#cb100-10" tabindex="-1"></a>  <span class="at">variance =</span> <span class="cn">TRUE</span> <span class="co"># note error message: &quot;Bad stratification, i.e., strata too small to compute variance of annual panels.&quot; </span></span>
+<span id="cb100-11"><a href="make.html#cb100-11" tabindex="-1"></a>)</span>
+<span id="cb100-12"><a href="make.html#cb100-12" tabindex="-1"></a><span class="fu">saveRDS</span>(invasive, <span class="fu">paste0</span>(save_location, <span class="st">&quot;invasive.rds&quot;</span>))</span></code></pre></div>
+</div>
+</div>
+<div id="stand-structural-stage-distributions" class="section level2 hasAnchor" number="4.12">
+<h2><span class="header-section-number">4.12</span> Stand structural stage distributions<a href="make.html#stand-structural-stage-distributions" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>The <a href="https://rdrr.io/cran/rFIA/man/standStruct.html">rFIA::standStruct()</a> function estimates forest structural stage distributions as percent forested land area in pole, mature, late, and mosaic stages and returns the stand structural stage distribution of an area of forest/timberland from FIA data.</p>
+<ul>
+<li><strong>Description:</strong> Estimates of forest structural stage distributions as percent forested land area in pole, mature, late, and mosaic stages
+<ul>
+<li><ins>
+Diameter Classes:
+</ins>
+<ul>
+<li><em>Pole</em>: 11 - 25.9 cm</li>
+<li><em>Mature</em>: 26 - 45.9 cm</li>
+<li><em>Large</em>: 46+ cm</li>
+</ul></li>
+<li><ins>
+Structural Stage Classification:
+</ins>
+<ul>
+<li><em>Pole Stage</em>: &gt; 67% BA in pole and mature classes, with more BA in pole than mature.</li>
+<li><em>Mature Stage</em>: &gt; 67% BA in pole and mature classes, with more BA in mature than pole OR &gt; 67% BA in mature and large classes, with more BA in mature.</li>
+<li><em>Late-Successional Stage:</em>: &gt; 67% BA in mature and large classes, with more in large.</li>
+<li><em>Mosiac:</em>: Any plot not meeting above criteria.</li>
+</ul></li>
+</ul></li>
+</ul>
+<div id="ss" class="section level3 hasAnchor" number="4.12.1">
+<h3><span class="header-section-number">4.12.1</span> ss<a href="make.html#ss" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<div class="sourceCode" id="cb101"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb101-1"><a href="make.html#cb101-1" tabindex="-1"></a><span class="do">## stand structural stage</span></span>
+<span id="cb101-2"><a href="make.html#cb101-2" tabindex="-1"></a>ss <span class="ot">&lt;-</span> rFIA<span class="sc">::</span><span class="fu">standStruct</span>(</span>
+<span id="cb101-3"><a href="make.html#cb101-3" tabindex="-1"></a>  <span class="at">db =</span> database_variable,</span>
+<span id="cb101-4"><a href="make.html#cb101-4" tabindex="-1"></a>  <span class="at">byPlot =</span> by_plot_variable,</span>
+<span id="cb101-5"><a href="make.html#cb101-5" tabindex="-1"></a>  <span class="at">polys =</span> polys_variable,</span>
+<span id="cb101-6"><a href="make.html#cb101-6" tabindex="-1"></a>  <span class="at">method =</span> method_variable,</span>
+<span id="cb101-7"><a href="make.html#cb101-7" tabindex="-1"></a>  <span class="at">nCores =</span> cores_variable,</span>
+<span id="cb101-8"><a href="make.html#cb101-8" tabindex="-1"></a>  <span class="at">returnSpatial =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb101-9"><a href="make.html#cb101-9" tabindex="-1"></a>  <span class="at">totals =</span> <span class="cn">TRUE</span></span>
+<span id="cb101-10"><a href="make.html#cb101-10" tabindex="-1"></a>)</span>
+<span id="cb101-11"><a href="make.html#cb101-11" tabindex="-1"></a><span class="fu">saveRDS</span>(ss, <span class="fu">paste0</span>(save_location, <span class="st">&quot;ss.rds&quot;</span>))</span></code></pre></div>
+</div>
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="clip.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="references.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"linkedin": false,
+"weibo": false,
+"instapaper": false,
+"vk": false,
+"whatsapp": false,
+"all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": "https://github.com/USERNAME/REPO/edit/BRANCH/03-make.Rmd",
+"text": "Edit"
+},
+"history": {
+"link": null,
+"text": null
+},
+"view": {
+"link": null,
+"text": null
+},
+"download": ["_main.pdf", "_main.epub"],
+"search": {
+"engine": "fuse",
+"options": null
+},
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+</body>
+
+</html>
